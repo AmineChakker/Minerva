@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Teacher;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class TeacherController extends Controller
+{
+    private function schoolId(): int
+    {
+        return Auth::user()->school_id;
+    }
+
+    public function index()
+    {
+        $teachers = Teacher::with('user')
+            ->whereHas('user', fn($q) => $q->where('school_id', $this->schoolId()))
+            ->latest()->paginate(15);
+
+        return view('HTML.teachers.index', compact('teachers'));
+    }
+
+    public function create()
+    {
+        return view('HTML.teachers.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'first_name'       => 'required|string|max:100',
+            'last_name'        => 'required|string|max:100',
+            'email'            => 'required|email|unique:users,email',
+            'password'         => 'required|min:8',
+            'gender'           => 'nullable|in:male,female,other',
+            'phone'            => 'nullable|string|max:20',
+            'employee_id'      => 'required|unique:teachers,employee_id',
+            'hire_date'        => 'nullable|date',
+            'qualification'    => 'nullable|string|max:255',
+            'experience_years' => 'nullable|integer|min:0',
+            'specialization'   => 'nullable|string|max:255',
+            'salary'           => 'nullable|numeric|min:0',
+            'status'           => 'required|in:active,on_leave,resigned,terminated',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'school_id'  => $this->schoolId(),
+                'first_name' => $request->first_name,
+                'last_name'  => $request->last_name,
+                'email'      => $request->email,
+                'phone'      => $request->phone,
+                'password'   => Hash::make($request->password),
+                'role'       => 'teacher',
+                'gender'     => $request->gender,
+                'is_active'  => true,
+            ]);
+
+            Teacher::create([
+                'user_id'          => $user->id,
+                'employee_id'      => $request->employee_id,
+                'hire_date'        => $request->hire_date,
+                'qualification'    => $request->qualification,
+                'experience_years' => $request->experience_years ?? 0,
+                'specialization'   => $request->specialization,
+                'salary'           => $request->salary,
+                'status'           => $request->status,
+            ]);
+        });
+
+        return redirect()->route('teachers.index')->with('success', 'Teacher created successfully.');
+    }
+
+    public function show(Teacher $teacher)
+    {
+        $teacher->load('user');
+        return view('HTML.teachers.show', compact('teacher'));
+    }
+
+    public function edit(Teacher $teacher)
+    {
+        $teacher->load('user');
+        return view('HTML.teachers.edit', compact('teacher'));
+    }
+
+    public function update(Request $request, Teacher $teacher)
+    {
+        $request->validate([
+            'first_name'       => 'required|string|max:100',
+            'last_name'        => 'required|string|max:100',
+            'email'            => 'required|email|unique:users,email,' . $teacher->user_id,
+            'employee_id'      => 'required|unique:teachers,employee_id,' . $teacher->id,
+            'status'           => 'required|in:active,on_leave,resigned,terminated',
+        ]);
+
+        DB::transaction(function () use ($request, $teacher) {
+            $teacher->user->update([
+                'first_name' => $request->first_name,
+                'last_name'  => $request->last_name,
+                'email'      => $request->email,
+                'phone'      => $request->phone,
+                'gender'     => $request->gender,
+            ]);
+
+            if ($request->filled('password')) {
+                $teacher->user->update(['password' => Hash::make($request->password)]);
+            }
+
+            $teacher->update([
+                'employee_id'      => $request->employee_id,
+                'hire_date'        => $request->hire_date,
+                'qualification'    => $request->qualification,
+                'experience_years' => $request->experience_years ?? 0,
+                'specialization'   => $request->specialization,
+                'salary'           => $request->salary,
+                'status'           => $request->status,
+            ]);
+        });
+
+        return redirect()->route('teachers.index')->with('success', 'Teacher updated successfully.');
+    }
+
+    public function destroy(Teacher $teacher)
+    {
+        $teacher->user->delete();
+        return redirect()->route('teachers.index')->with('success', 'Teacher deleted successfully.');
+    }
+}
