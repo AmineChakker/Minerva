@@ -7,8 +7,8 @@
     <div class="card-body">
         <div class="flex items-center justify-between mb-5">
             <h5 class="text-base font-semibold text-default-700">All Teachers</h5>
-            <a href="{{ route('teachers.create') }}" class="btn bg-primary text-white btn-sm">
-                <i class="iconify tabler--plus mr-1"></i> Add Teacher
+            <a href="{{ route('teachers.create') }}" class="btn bg-primary text-white btn-sm gap-1.5">
+                <i class="ti ti-plus"></i> Add Teacher
             </a>
         </div>
         <div class="overflow-x-auto">
@@ -29,9 +29,7 @@
                         <td class="px-6 py-3 text-sm text-default-500">{{ $loop->iteration }}</td>
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-3">
-                                <div class="size-9 rounded-full bg-success/10 flex items-center justify-center text-sm font-bold text-success">
-                                    {{ strtoupper(substr($teacher->user->first_name, 0, 1)) }}{{ strtoupper(substr($teacher->user->last_name, 0, 1)) }}
-                                </div>
+                                @include('HTML.partials.avatar', ['user' => $teacher->user, 'size' => 'size-9', 'textSize' => 'text-sm', 'color' => 'success'])
                                 <div>
                                     <p class="text-sm font-medium text-default-800">{{ $teacher->user->full_name }}</p>
                                     <p class="text-xs text-default-500 capitalize">{{ $teacher->user->gender ?? '&mdash;' }}</p>
@@ -44,15 +42,15 @@
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('teachers.show', $teacher) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
-                                    <i class="iconify tabler--eye text-sm"></i>
+                                    <i class="ti ti-eye text-sm"></i>
                                 </a>
                                 <a href="{{ route('teachers.edit', $teacher) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
-                                    <i class="iconify tabler--edit text-sm"></i>
+                                    <i class="ti ti-edit text-sm"></i>
                                 </a>
                                 <form action="{{ route('teachers.destroy', $teacher) }}" method="POST" onsubmit="return confirm('Delete this teacher?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center">
-                                        <i class="iconify tabler--trash text-sm"></i>
+                                        <i class="ti ti-trash text-sm"></i>
                                     </button>
                                 </form>
                             </div>
@@ -61,7 +59,6 @@
                     @empty
                     <tr>
                         <td colspan="6" class="px-6 py-10 text-center text-default-400">
-                            <i class="size-8 mb-2 block mx-auto" data-lucide="user-check"></i>
                             No teachers found. <a href="{{ route('teachers.create') }}" class="text-primary">Add one now.</a>
                         </td>
                     </tr>

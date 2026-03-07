@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
 {
@@ -46,19 +47,25 @@ class TeacherController extends Controller
             'specialization'   => 'nullable|string|max:255',
             'salary'           => 'nullable|numeric|min:0',
             'status'           => 'required|in:active,on_leave,resigned,terminated',
+            'profile_photo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $photoPath = $request->hasFile('profile_photo')
+            ? $request->file('profile_photo')->store('profile-photos', 'public')
+            : null;
+
+        DB::transaction(function () use ($request, $photoPath) {
             $user = User::create([
-                'school_id'  => $this->schoolId(),
-                'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
-                'phone'      => $request->phone,
-                'password'   => Hash::make($request->password),
-                'role'       => 'teacher',
-                'gender'     => $request->gender,
-                'is_active'  => true,
+                'school_id'     => $this->schoolId(),
+                'first_name'    => $request->first_name,
+                'last_name'     => $request->last_name,
+                'email'         => $request->email,
+                'phone'         => $request->phone,
+                'password'      => Hash::make($request->password),
+                'role'          => 'teacher',
+                'gender'        => $request->gender,
+                'profile_photo' => $photoPath,
+                'is_active'     => true,
             ]);
 
             Teacher::create([
@@ -96,16 +103,26 @@ class TeacherController extends Controller
             'email'            => 'required|email|unique:users,email,' . $teacher->user_id,
             'employee_id'      => 'required|unique:teachers,employee_id,' . $teacher->id,
             'status'           => 'required|in:active,on_leave,resigned,terminated',
+            'profile_photo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $teacher) {
-            $teacher->user->update([
+            $userData = [
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'phone'      => $request->phone,
                 'gender'     => $request->gender,
-            ]);
+            ];
+
+            if ($request->hasFile('profile_photo')) {
+                if ($teacher->user->profile_photo) {
+                    Storage::disk('public')->delete($teacher->user->profile_photo);
+                }
+                $userData['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
+            }
+
+            $teacher->user->update($userData);
 
             if ($request->filled('password')) {
                 $teacher->user->update(['password' => Hash::make($request->password)]);
@@ -127,6 +144,9 @@ class TeacherController extends Controller
 
     public function destroy(Teacher $teacher)
     {
+        if ($teacher->user->profile_photo) {
+            Storage::disk('public')->delete($teacher->user->profile_photo);
+        }
         $teacher->user->delete();
         return redirect()->route('teachers.index')->with('success', 'Teacher deleted successfully.');
     }

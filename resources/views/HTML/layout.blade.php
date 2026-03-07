@@ -37,6 +37,7 @@
     </script>
 
     <link rel="stylesheet" href="/assets/app-0ZOPNGSF.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.22.0/dist/tabler-icons.min.css">
 </head>
 <body>
 
@@ -59,7 +60,7 @@
         <!-- Hover toggle -->
         <div class="absolute top-0 end-5 flex h-topbar items-center justify">
             <button id="button-hover-toggle">
-                <i class="iconify tabler--circle size-5"></i>
+                <i class="ti ti-circle size-5"></i>
             </button>
         </div>
 
@@ -132,11 +133,11 @@
             <div class="w-full flex items-center justify-between px-6">
                 <div class="flex items-center gap-5">
                     <button class="btn btn-icon size-9 bg-default-400/10 hover:bg-default-150 rounded" id="button-toggle-menu">
-                        <i class="iconify lucide--align-left text-xl"></i>
+                        <i class="ti ti-align-left text-xl"></i>
                     </button>
                     <div class="lg:flex hidden items-center relative">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <i class="iconify tabler--search text-base"></i>
+                            <i class="ti ti-search text-base"></i>
                         </div>
                         <input class="form-input px-12 text-sm rounded border-transparent focus:border-transparent w-60" placeholder="Search something..." type="search"/>
                     </div>
@@ -146,8 +147,8 @@
                     <!-- Dark Mode Toggle -->
                     <div class="topbar-item">
                         <button class="btn btn-icon size-8 hover:bg-default-150 transition-[scale] rounded-full" id="light-dark-mode" type="button">
-                            <i class="iconify tabler--moon text-xl absolute dark:scale-0 dark:-rotate-90 scale-100 rotate-0 transition-all duration-200"></i>
-                            <i class="iconify tabler--sun text-xl absolute dark:scale-100 dark:rotate-0 scale-0 rotate-90 transition-all duration-200"></i>
+                            <i class="ti ti-moon text-xl absolute dark:scale-0 dark:-rotate-90 scale-100 rotate-0 transition-all duration-200"></i>
+                            <i class="ti ti-sun text-xl absolute dark:scale-100 dark:rotate-0 scale-0 rotate-90 transition-all duration-200"></i>
                         </button>
                     </div>
 
@@ -161,17 +162,25 @@
                     <!-- Profile Dropdown -->
                     <div class="topbar-item hs-dropdown relative inline-flex">
                         <button aria-expanded="false" aria-haspopup="menu" aria-label="Dropdown" class="cursor-pointer bg-primary/10 rounded-full hs-dropdown-toggle">
-                            <div class="size-9.5 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
-                                {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
-                            </div>
+                            @if(auth()->user()->profile_photo)
+                                <img src="{{ Storage::url(auth()->user()->profile_photo) }}" class="size-9.5 rounded-full object-cover ring-2 ring-primary/20" alt="{{ auth()->user()->full_name }}">
+                            @else
+                                <div class="size-9.5 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary">
+                                    {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
+                                </div>
+                            @endif
                         </button>
                         <div aria-orientation="vertical" class="hs-dropdown-menu min-w-48" role="menu">
                             <div class="p-2">
                                 <h6 class="mb-2 text-default-500">{{ auth()->user()->school->name ?? 'EduPulse' }}</h6>
                                 <div class="flex gap-3">
-                                    <div class="size-12 rounded bg-primary/20 flex items-center justify-center text-lg font-bold text-primary">
-                                        {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
-                                    </div>
+                                    @if(auth()->user()->profile_photo)
+                                        <img src="{{ Storage::url(auth()->user()->profile_photo) }}" class="size-12 rounded object-cover" alt="{{ auth()->user()->full_name }}">
+                                    @else
+                                        <div class="size-12 rounded bg-primary/20 flex items-center justify-center text-lg font-bold text-primary">
+                                            {{ strtoupper(substr(auth()->user()->first_name, 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name, 0, 1)) }}
+                                        </div>
+                                    @endif
                                     <div>
                                         <h6 class="mb-1 text-sm font-semibold text-default-800">{{ auth()->user()->full_name }}</h6>
                                         <p class="text-default-500 capitalize">{{ auth()->user()->role }}</p>
@@ -203,7 +212,7 @@
                 <h4 class="text-default-900 text-lg font-semibold">@yield('page-title', 'Dashboard')</h4>
                 <div class="md:flex hidden items-center gap-2 text-sm font-semibold">
                     <a class="text-sm font-medium text-default-700" href="{{ route('dashboard') }}">EduPulse</a>
-                    <i class="iconify tabler--chevron-right text-sm flex-shrink-0 text-default-500 rtl:rotate-180"></i>
+                    <i class="ti ti-chevron-right text-sm flex-shrink-0 text-default-500 rtl:rotate-180"></i>
                     <a aria-current="page" class="text-sm font-medium text-default-700" href="#">@yield('page-title', 'Dashboard')</a>
                 </div>
             </div>
@@ -211,13 +220,13 @@
             <!-- Flash Messages -->
             @if(session('success'))
                 <div class="flex items-center gap-3 bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg text-sm mb-6">
-                    <i class="iconify tabler--circle-check text-lg flex-shrink-0"></i>
+                    <i class="ti ti-circle-check text-lg flex-shrink-0"></i>
                     {{ session('success') }}
                 </div>
             @endif
             @if(session('error'))
                 <div class="flex items-center gap-3 bg-danger/10 border border-danger/20 text-danger px-4 py-3 rounded-lg text-sm mb-6">
-                    <i class="iconify tabler--circle-x text-lg flex-shrink-0"></i>
+                    <i class="ti ti-circle-x text-lg flex-shrink-0"></i>
                     {{ session('error') }}
                 </div>
             @endif
@@ -247,7 +256,7 @@
     <div class="min-h-16 flex items-center text-default-600 border-b border-dashed border-default-900/10 px-6 gap-3">
         <h5 class="text-base grow">Theme Settings</h5>
         <button class="btn size-9 rounded-full btn-sm hover:bg-default-150" data-hs-overlay="#theme-customization" type="button">
-            <i class="iconify tabler--x text-xl"></i>
+            <i class="ti ti-x text-xl"></i>
         </button>
     </div>
     <div class="h-full flex-grow overflow-y-auto" data-simplebar="">

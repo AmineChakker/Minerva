@@ -8,7 +8,7 @@
         <div class="flex items-center justify-between mb-5">
             <h5 class="text-base font-semibold text-default-700">All Classes</h5>
             <a href="{{ route('classes.create') }}" class="btn bg-primary text-white btn-sm">
-                <i class="iconify tabler--plus mr-1"></i> Add Class
+                <i class="ti ti-plus mr-1"></i> Add Class
             </a>
         </div>
         <div class="overflow-x-auto">
@@ -39,15 +39,15 @@
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('classes.show', $class) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
-                                    <i class="iconify tabler--eye text-sm"></i>
+                                    <i class="ti ti-eye text-sm"></i>
                                 </a>
                                 <a href="{{ route('classes.edit', $class) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
-                                    <i class="iconify tabler--edit text-sm"></i>
+                                    <i class="ti ti-edit text-sm"></i>
                                 </a>
                                 <form action="{{ route('classes.destroy', $class) }}" method="POST" onsubmit="return confirm('Delete this class?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center">
-                                        <i class="iconify tabler--trash text-sm"></i>
+                                        <i class="ti ti-trash text-sm"></i>
                                     </button>
                                 </form>
                             </div>

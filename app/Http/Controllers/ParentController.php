@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ParentController extends Controller
 {
@@ -46,18 +47,24 @@ class ParentController extends Controller
             'relation_to_student' => 'required|in:father,mother,guardian,other',
             'student_ids'         => 'nullable|array',
             'student_ids.*'       => 'exists:students,id',
+            'profile_photo'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $photoPath = $request->hasFile('profile_photo')
+            ? $request->file('profile_photo')->store('profile-photos', 'public')
+            : null;
+
+        DB::transaction(function () use ($request, $photoPath) {
             $user = User::create([
-                'school_id'  => $this->schoolId(),
-                'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
-                'phone'      => $request->phone,
-                'password'   => Hash::make($request->password),
-                'role'       => 'parent',
-                'is_active'  => true,
+                'school_id'     => $this->schoolId(),
+                'first_name'    => $request->first_name,
+                'last_name'     => $request->last_name,
+                'email'         => $request->email,
+                'phone'         => $request->phone,
+                'password'      => Hash::make($request->password),
+                'role'          => 'parent',
+                'profile_photo' => $photoPath,
+                'is_active'     => true,
             ]);
 
             $parent = ParentProfile::create([
@@ -99,15 +106,25 @@ class ParentController extends Controller
             'relation_to_student' => 'required|in:father,mother,guardian,other',
             'student_ids'         => 'nullable|array',
             'student_ids.*'       => 'exists:students,id',
+            'profile_photo'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $parent) {
-            $parent->user->update([
+            $userData = [
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'phone'      => $request->phone,
-            ]);
+            ];
+
+            if ($request->hasFile('profile_photo')) {
+                if ($parent->user->profile_photo) {
+                    Storage::disk('public')->delete($parent->user->profile_photo);
+                }
+                $userData['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
+            }
+
+            $parent->user->update($userData);
 
             if ($request->filled('password')) {
                 $parent->user->update(['password' => Hash::make($request->password)]);
@@ -126,6 +143,9 @@ class ParentController extends Controller
 
     public function destroy(ParentProfile $parent)
     {
+        if ($parent->user->profile_photo) {
+            Storage::disk('public')->delete($parent->user->profile_photo);
+        }
         $parent->user->delete();
         return redirect()->route('parents.index')->with('success', 'Parent deleted successfully.');
     }

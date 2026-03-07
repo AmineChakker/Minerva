@@ -27,7 +27,7 @@
 
                         @if($errors->any())
                             <div class="flex items-center gap-3 bg-danger/10 border border-danger/20 text-danger px-4 py-3 rounded-lg text-sm mb-6 text-left">
-                                <i class="iconify tabler--circle-x text-lg flex-shrink-0"></i>
+                                <i class="ti ti-circle-x text-lg flex-shrink-0"></i>
                                 {{ $errors->first() }}
                             </div>
                         @endif

@@ -8,7 +8,7 @@
         <div class="flex items-center justify-between mb-5">
             <h5 class="text-base font-semibold text-default-700">All Subjects</h5>
             <a href="{{ route('subjects.create') }}" class="btn bg-primary text-white btn-sm">
-                <i class="iconify tabler--plus mr-1"></i> Add Subject
+                <i class="ti ti-plus mr-1"></i> Add Subject
             </a>
         </div>
         <div class="overflow-x-auto">
@@ -39,12 +39,12 @@
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
-                                    <i class="iconify tabler--edit text-sm"></i>
+                                    <i class="ti ti-edit text-sm"></i>
                                 </a>
                                 <form action="{{ route('subjects.destroy', $subject) }}" method="POST" onsubmit="return confirm('Delete this subject?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center">
-                                        <i class="iconify tabler--trash text-sm"></i>
+                                        <i class="ti ti-trash text-sm"></i>
                                     </button>
                                 </form>
                             </div>

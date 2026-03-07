@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
@@ -49,19 +50,25 @@ class StudentController extends Controller
             'date_of_birth'    => 'nullable|date',
             'enrollment_date'  => 'required|date',
             'status'           => 'required|in:active,graduated,suspended,inactive',
+            'profile_photo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $photoPath = $request->hasFile('profile_photo')
+            ? $request->file('profile_photo')->store('profile-photos', 'public')
+            : null;
+
+        DB::transaction(function () use ($request, $photoPath) {
             $user = User::create([
-                'school_id'  => $this->schoolId(),
-                'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
-                'phone'      => $request->phone,
-                'password'   => Hash::make($request->password),
-                'role'       => 'student',
-                'gender'     => $request->gender,
-                'is_active'  => true,
+                'school_id'     => $this->schoolId(),
+                'first_name'    => $request->first_name,
+                'last_name'     => $request->last_name,
+                'email'         => $request->email,
+                'phone'         => $request->phone,
+                'password'      => Hash::make($request->password),
+                'role'          => 'student',
+                'gender'        => $request->gender,
+                'profile_photo' => $photoPath,
+                'is_active'     => true,
             ]);
 
             Student::create([
@@ -108,16 +115,26 @@ class StudentController extends Controller
             'academic_year_id' => 'required|exists:academic_years,id',
             'enrollment_date'  => 'required|date',
             'status'           => 'required|in:active,graduated,suspended,inactive',
+            'profile_photo'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $student) {
-            $student->user->update([
+            $userData = [
                 'first_name' => $request->first_name,
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'phone'      => $request->phone,
                 'gender'     => $request->gender,
-            ]);
+            ];
+
+            if ($request->hasFile('profile_photo')) {
+                if ($student->user->profile_photo) {
+                    Storage::disk('public')->delete($student->user->profile_photo);
+                }
+                $userData['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
+            }
+
+            $student->user->update($userData);
 
             if ($request->filled('password')) {
                 $student->user->update(['password' => Hash::make($request->password)]);
@@ -143,7 +160,10 @@ class StudentController extends Controller
 
     public function destroy(Student $student)
     {
-        $student->user->delete(); // cascades to student
+        if ($student->user->profile_photo) {
+            Storage::disk('public')->delete($student->user->profile_photo);
+        }
+        $student->user->delete();
         return redirect()->route('students.index')->with('success', 'Student deleted successfully.');
     }
 }

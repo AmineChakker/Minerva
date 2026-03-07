@@ -4,60 +4,127 @@
 
 @section('content')
 <div class="card max-w-3xl">
-    <div class="card-body">
-        <h5 class="text-base font-semibold text-default-700 mb-5">New Teacher</h5>
+    <div class="card-header border-b border-default-200 pb-4 mb-6 flex items-center gap-3">
+        <div class="size-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <i class="ti ti-user-plus text-lg text-primary"></i>
+        </div>
+        <div>
+            <h5 class="text-base font-semibold text-default-800">New Teacher</h5>
+            <p class="text-xs text-default-400 mt-0.5">Fill in the details to register a new teacher</p>
+        </div>
+    </div>
+    <div class="card-body pt-0">
         @include('HTML.partials.errors')
-        <form action="{{ route('teachers.store') }}" method="POST">
+        <form action="{{ route('teachers.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">First Name *</label>
-                    <input class="form-input" name="first_name" type="text" value="{{ old('first_name') }}" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Last Name *</label>
-                    <input class="form-input" name="last_name" type="text" value="{{ old('last_name') }}" required>
-                </div>
-            </div>
-            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Email *</label>
-                    <input class="form-input" name="email" type="email" value="{{ old('email') }}" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Password *</label>
-                    <input class="form-input" name="password" type="password" required>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-default-700 mb-3">Profile Photo</label>
+                <div class="flex items-center gap-4">
+                    <div id="photo-preview" class="size-16 rounded-full bg-success/10 flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-default-200">
+                        <span class="text-xl font-bold text-success" id="photo-initials">?</span>
+                    </div>
+                    <div>
+                        <input type="file" name="profile_photo" id="profile_photo" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" onchange="previewPhoto(this)">
+                        <label for="profile_photo" class="btn bg-default-150 text-sm cursor-pointer gap-1.5">
+                            <i class="ti ti-upload text-base"></i> Choose Photo
+                        </label>
+                        <p class="text-xs text-default-400 mt-1.5">JPG, PNG or WebP — max 2MB</p>
+                    </div>
                 </div>
             </div>
+
+            <div class="border-t border-default-100 mb-5"></div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-default-400 mb-3">Account Info</p>
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">First Name <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="first_name" type="text" value="{{ old('first_name') }}" required placeholder="First name" oninput="updateInitials()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Last Name <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="last_name" type="text" value="{{ old('last_name') }}" required placeholder="Last name" oninput="updateInitials()">
+                </div>
+            </div>
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Email <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="email" type="email" value="{{ old('email') }}" required placeholder="teacher@school.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Password <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="password" type="password" placeholder="Min 8 characters" required>
+                </div>
+            </div>
+
+            <div class="border-t border-default-100 mb-5"></div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-default-400 mb-3">Professional Details</p>
             <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Gender</label>
-                    <select class="form-select" name="gender">
+                    <select class="form-select w-full" name="gender">
                         <option value="">Select gender</option>
                         <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Employee ID</label>
-                    <input class="form-input" name="employee_id" type="text" value="{{ old('employee_id') }}" placeholder="e.g. TCH-001">
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Employee ID <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="employee_id" type="text" value="{{ old('employee_id') }}" required placeholder="e.g. TCH-001">
                 </div>
             </div>
             <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Qualification</label>
-                    <input class="form-input" name="qualification" type="text" value="{{ old('qualification') }}" placeholder="e.g. M.Ed">
+                    <input class="form-input w-full" name="qualification" type="text" value="{{ old('qualification') }}" placeholder="e.g. M.Ed">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Specialization</label>
-                    <input class="form-input" name="specialization" type="text" value="{{ old('specialization') }}" placeholder="e.g. Mathematics">
+                    <input class="form-input w-full" name="specialization" type="text" value="{{ old('specialization') }}" placeholder="e.g. Mathematics">
                 </div>
             </div>
-            <div class="flex items-center gap-3 mt-6">
-                <button type="submit" class="btn bg-primary text-white">Save Teacher</button>
-                <a href="{{ route('teachers.index') }}" class="btn bg-default-150">Cancel</a>
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Hire Date</label>
+                    <input class="form-input w-full" name="hire_date" type="date" value="{{ old('hire_date') }}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Status <span class="text-danger">*</span></label>
+                    <select class="form-select w-full" name="status" required>
+                        <option value="active" {{ old('status','active') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="on_leave" {{ old('status') == 'on_leave' ? 'selected' : '' }}>On Leave</option>
+                        <option value="resigned" {{ old('status') == 'resigned' ? 'selected' : '' }}>Resigned</option>
+                        <option value="terminated" {{ old('status') == 'terminated' ? 'selected' : '' }}>Terminated</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 pt-4 border-t border-default-100">
+                <button type="submit" class="btn bg-primary text-white gap-1.5">
+                    <i class="ti ti-device-floppy text-base"></i> Save Teacher
+                </button>
+                <a href="{{ route('teachers.index') }}" class="btn bg-default-150 text-default-600">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('photo-preview').innerHTML = '<img src="' + e.target.result + '" class="size-full object-cover">';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+function updateInitials() {
+    const fn = document.querySelector('[name=first_name]').value;
+    const ln = document.querySelector('[name=last_name]').value;
+    const el = document.getElementById('photo-initials');
+    if (el) el.textContent = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '?';
+}
+</script>
+@endpush
 @endsection

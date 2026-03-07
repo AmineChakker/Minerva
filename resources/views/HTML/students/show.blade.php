@@ -6,17 +6,34 @@
 <div class="grid lg:grid-cols-3 grid-cols-1 gap-5">
     <div class="card">
         <div class="card-body text-center">
-            <div class="size-20 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary mx-auto mb-3">
-                {{ strtoupper(substr($student->user->first_name, 0, 1)) }}{{ strtoupper(substr($student->user->last_name, 0, 1)) }}
+            <div class="relative inline-block mb-3">
+                @if($student->user->profile_photo)
+                    <img src="{{ Storage::url($student->user->profile_photo) }}"
+                         class="size-24 rounded-full object-cover mx-auto ring-4 ring-primary/20"
+                         alt="{{ $student->user->full_name }}">
+                @else
+                    <div class="size-24 rounded-full bg-primary/10 flex items-center justify-center text-3xl font-bold text-primary mx-auto ring-4 ring-primary/20">
+                        {{ strtoupper(substr($student->user->first_name,0,1)) }}{{ strtoupper(substr($student->user->last_name,0,1)) }}
+                    </div>
+                @endif
+                <a href="{{ route('students.edit', $student) }}"
+                   class="absolute bottom-0 end-0 size-7 bg-primary rounded-full flex items-center justify-center ring-2 ring-white"
+                   title="Edit photo">
+                    <i class="ti ti-camera text-white text-xs"></i>
+                </a>
             </div>
             <h5 class="text-lg font-semibold text-default-800">{{ $student->user->full_name }}</h5>
             <p class="text-default-500 text-sm mb-1">{{ $student->user->email }}</p>
             <span class="badge bg-primary/10 text-primary capitalize">Student</span>
             <div class="flex justify-center gap-2 mt-4">
-                <a href="{{ route('students.edit', $student) }}" class="btn bg-primary text-white btn-sm">Edit</a>
+                <a href="{{ route('students.edit', $student) }}" class="btn bg-primary text-white btn-sm gap-1">
+                    <i class="ti ti-edit text-sm"></i> Edit
+                </a>
                 <form action="{{ route('students.destroy', $student) }}" method="POST" onsubmit="return confirm('Delete this student?')">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn bg-danger text-white btn-sm">Delete</button>
+                    <button type="submit" class="btn bg-danger text-white btn-sm gap-1">
+                        <i class="ti ti-trash text-sm"></i> Delete
+                    </button>
                 </form>
             </div>
         </div>
@@ -56,9 +73,7 @@
                 <div class="space-y-2">
                     @foreach($student->parents as $parent)
                     <div class="flex items-center gap-3 p-3 bg-default-50 rounded-lg">
-                        <div class="size-8 rounded-full bg-info/10 flex items-center justify-center text-xs font-bold text-info">
-                            {{ strtoupper(substr($parent->user->first_name, 0, 1)) }}{{ strtoupper(substr($parent->user->last_name, 0, 1)) }}
-                        </div>
+                        @include('HTML.partials.avatar', ['user' => $parent->user, 'size' => 'size-8', 'textSize' => 'text-xs', 'color' => 'info'])
                         <div>
                             <p class="text-sm font-medium text-default-700">{{ $parent->user->full_name }}</p>
                             <p class="text-xs text-default-400">{{ $parent->user->email }}</p>
