@@ -25,9 +25,12 @@
             <h5 class="text-lg font-semibold text-default-800">{{ $student->user->full_name }}</h5>
             <p class="text-default-500 text-sm mb-1">{{ $student->user->email }}</p>
             <span class="badge bg-primary/10 text-primary capitalize">Student</span>
-            <div class="flex justify-center gap-2 mt-4">
+            <div class="flex justify-center gap-2 mt-4 flex-wrap">
                 <a href="{{ route('students.edit', $student) }}" class="btn bg-primary text-white btn-sm gap-1">
                     <i class="ti ti-edit text-sm"></i> Edit
+                </a>
+                <a href="{{ route('report-card.show', $student) }}" class="btn bg-success/10 text-success btn-sm gap-1">
+                    <i class="ti ti-file-type-pdf text-sm"></i> Report Card
                 </a>
                 <form action="{{ route('students.destroy', $student) }}" method="POST" onsubmit="return confirm('Delete this student?')">
                     @csrf @method('DELETE')

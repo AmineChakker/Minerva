@@ -38,6 +38,20 @@
 
     <link rel="stylesheet" href="/assets/app-0ZOPNGSF.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.22.0/dist/tabler-icons.min.css">
+    <style>
+        .form-select {
+            background-color: var(--color-card) !important;
+            color: var(--color-default-800) !important;
+            border-color: var(--color-default-200) !important;
+            border-radius: 0.25rem !important;
+            height: calc(var(--spacing) * 9.25) !important;
+            font-size: var(--text-sm) !important;
+        }
+        .form-select option {
+            background-color: var(--color-card);
+            color: var(--color-default-800);
+        }
+    </style>
 </head>
 <body>
 

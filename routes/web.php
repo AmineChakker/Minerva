@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\ReportCardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AttendanceController;
@@ -36,6 +37,8 @@ Route::middleware('auth')->group(function () {
         Route::post('attendance', [AttendanceController::class, 'store'])->name('attendance.store');
         Route::resource('exams', ExamController::class);
         Route::post('exams/{exam}/results', [ExamResultController::class, 'store'])->name('exam-results.store');
+        Route::get('students/{student}/report-card', [ReportCardController::class, 'show'])->name('report-card.show');
+        Route::get('students/{student}/report-card/{academicYear}/download', [ReportCardController::class, 'download'])->name('report-card.download');
     });
     Route::middleware('role:admin')->group(function () {
         Route::resource('admins', AdminController::class);

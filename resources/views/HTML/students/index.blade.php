@@ -47,6 +47,9 @@
                                 <a href="{{ route('students.edit', $student) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center" title="Edit">
                                     <i class="ti ti-edit text-sm"></i>
                                 </a>
+                                <a href="{{ route('report-card.show', $student) }}" class="btn btn-sm bg-success/10 text-success size-8 p-0 flex items-center justify-center" title="Report Card">
+                                    <i class="ti ti-file-type-pdf text-sm"></i>
+                                </a>
                                 <form action="{{ route('students.destroy', $student) }}" method="POST" onsubmit="return confirm('Delete this student?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center" title="Delete">
