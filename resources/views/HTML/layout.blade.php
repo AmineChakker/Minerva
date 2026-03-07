@@ -117,6 +117,75 @@
                             <span class="menu-text">Subjects</span>
                         </a>
                     </li>
+
+                    <li class="menu-title"><span>Attendance &amp; Exams</span></li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}" href="{{ route('attendance.index') }}">
+                            <span class="menu-icon"><i class="ti ti-clipboard-check"></i></span>
+                            <span class="menu-text">Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('exams.*') ? 'active' : '' }}" href="{{ route('exams.index') }}">
+                            <span class="menu-icon"><i class="ti ti-writing"></i></span>
+                            <span class="menu-text">Exams</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    @if(auth()->user()->isAdmin())
+                    <li class="menu-title"><span>Administration</span></li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('admins.*') ? 'active' : '' }}" href="{{ route('admins.index') }}">
+                            <span class="menu-icon"><i class="ti ti-shield-check"></i></span>
+                            <span class="menu-text">Admins</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('academic-years.*') ? 'active' : '' }}" href="{{ route('academic-years.index') }}">
+                            <span class="menu-icon"><i class="ti ti-calendar-stats"></i></span>
+                            <span class="menu-text">Academic Years</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}" href="{{ route('announcements.index') }}">
+                            <span class="menu-icon"><i class="ti ti-speakerphone"></i></span>
+                            <span class="menu-text">Announcements</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('fees.*') ? 'active' : '' }}" href="{{ route('fees.index') }}">
+                            <span class="menu-icon"><i class="ti ti-credit-card"></i></span>
+                            <span class="menu-text">Fee Management</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                            <span class="menu-icon"><i class="ti ti-users-group"></i></span>
+                            <span class="menu-text">All Users</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
+                            <span class="menu-icon"><i class="ti ti-chart-bar"></i></span>
+                            <span class="menu-text">Reports</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('school.settings') ? 'active' : '' }}" href="{{ route('school.settings') }}">
+                            <span class="menu-icon"><i class="ti ti-settings"></i></span>
+                            <span class="menu-text">School Settings</span>
+                        </a>
+                    </li>
                     @endif
 
                 </ul>
