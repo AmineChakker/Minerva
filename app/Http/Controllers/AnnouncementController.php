@@ -5,8 +5,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 class AnnouncementController extends Controller {
     private function schoolId(): int { return Auth::user()->school_id; }
-    public function index() {
-        $announcements = Announcement::with('user')->where('school_id', $this->schoolId())->latest()->paginate(12);
+    public function index(Request $request) {
+        $query = Announcement::with('user')->where('school_id', $this->schoolId());
+
+        if ($request->filled('search')) {
+            $query->where(fn($q) => $q->where('title', 'like', '%'.$request->search.'%')->orWhere('content', 'like', '%'.$request->search.'%'));
+        }
+        if ($request->filled('type'))         $query->where('type', $request->type);
+        if ($request->filled('is_published')) $query->where('is_published', $request->is_published === '1');
+
+        match($request->input('sort', 'newest')) {
+            'oldest'   => $query->orderBy('created_at'),
+            'title'    => $query->orderBy('title'),
+            default    => $query->latest(),
+        };
+
+        $announcements = $query->paginate(12)->withQueryString();
         return view('HTML.announcements.index', compact('announcements'));
     }
     public function create() { return view('HTML.announcements.create'); }

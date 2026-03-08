@@ -19,13 +19,39 @@ class StudentController extends Controller
         return Auth::user()->school_id;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::with(['user', 'classRoom', 'academicYear'])
-            ->whereHas('user', fn($q) => $q->where('school_id', $this->schoolId()))
-            ->latest()->paginate(15);
+        $query = Student::with(['user', 'classRoom', 'academicYear'])
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->where('users.school_id', $this->schoolId())
+            ->select('students.*');
 
-        return view('HTML.students.index', compact('students'));
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(fn($q) => $q
+                ->where('users.first_name', 'like', $s)
+                ->orWhere('users.last_name', 'like', $s)
+                ->orWhere('users.email', 'like', $s)
+                ->orWhere('students.admission_number', 'like', $s)
+            );
+        }
+        if ($request->filled('class_id'))         $query->where('students.class_id', $request->class_id);
+        if ($request->filled('academic_year_id')) $query->where('students.academic_year_id', $request->academic_year_id);
+        if ($request->filled('status'))           $query->where('students.status', $request->status);
+
+        match($request->input('sort', 'newest')) {
+            'name_asc'        => $query->orderBy('users.first_name')->orderBy('users.last_name'),
+            'name_desc'       => $query->orderByDesc('users.first_name'),
+            'enrollment_asc'  => $query->orderBy('students.enrollment_date'),
+            'enrollment_desc' => $query->orderByDesc('students.enrollment_date'),
+            default           => $query->orderByDesc('students.created_at'),
+        };
+
+        $students      = $query->paginate(15)->withQueryString();
+        $classes       = ClassRoom::where('school_id', $this->schoolId())->orderBy('name')->get();
+        $academicYears = AcademicYear::where('school_id', $this->schoolId())->orderByDesc('start_date')->get();
+
+        return view('HTML.students.index', compact('students', 'classes', 'academicYears'));
     }
 
     public function create()

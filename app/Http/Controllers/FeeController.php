@@ -9,9 +9,26 @@ class FeeController extends Controller {
     private function schoolId(): int { return Auth::user()->school_id; }
     public function index(Request $request) {
         $query = Fee::with(['student.user', 'academicYear'])->where('school_id', $this->schoolId());
-        if ($request->filled('status')) $query->where('status', $request->status);
+
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->whereHas('student.user', fn($q) => $q
+                ->where('first_name', 'like', $s)
+                ->orWhere('last_name', 'like', $s)
+            );
+        }
+        if ($request->filled('status'))           $query->where('status', $request->status);
         if ($request->filled('academic_year_id')) $query->where('academic_year_id', $request->academic_year_id);
-        $fees = $query->latest()->paginate(15);
+
+        match($request->input('sort', 'newest')) {
+            'due_asc'     => $query->orderBy('due_date'),
+            'due_desc'    => $query->orderByDesc('due_date'),
+            'amount_desc' => $query->orderByDesc('amount'),
+            'amount_asc'  => $query->orderBy('amount'),
+            default       => $query->latest(),
+        };
+
+        $fees          = $query->paginate(15)->withQueryString();
         $academicYears = AcademicYear::where('school_id', $this->schoolId())->orderByDesc('start_date')->get();
         return view('HTML.fees.index', compact('fees', 'academicYears'));
     }

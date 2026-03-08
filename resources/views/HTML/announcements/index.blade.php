@@ -6,6 +6,51 @@
 <span class="font-medium text-default-700">Announcements</span>
 @endsection
 @section('content')
+<div class="card mb-5">
+    <div class="card-body">
+        <form method="GET" action="{{ route('announcements.index') }}" class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-52">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Search</label>
+                <div class="relative">
+                    <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-default-400 text-sm"></i>
+                    <input class="form-input w-full pl-9" name="search" value="{{ request('search') }}" placeholder="Title or content...">
+                </div>
+            </div>
+            <div class="min-w-36">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Type</label>
+                <select class="form-input w-full" name="type">
+                    <option value="">All Types</option>
+                    <option value="info"    {{ request('type') == 'info'    ? 'selected' : '' }}>Info</option>
+                    <option value="success" {{ request('type') == 'success' ? 'selected' : '' }}>Success</option>
+                    <option value="warning" {{ request('type') == 'warning' ? 'selected' : '' }}>Warning</option>
+                    <option value="danger"  {{ request('type') == 'danger'  ? 'selected' : '' }}>Danger</option>
+                </select>
+            </div>
+            <div class="min-w-36">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Status</label>
+                <select class="form-input w-full" name="is_published">
+                    <option value="">All</option>
+                    <option value="1" {{ request('is_published') === '1' ? 'selected' : '' }}>Published</option>
+                    <option value="0" {{ request('is_published') === '0' ? 'selected' : '' }}>Draft</option>
+                </select>
+            </div>
+            <div class="min-w-40">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Sort By</label>
+                <select class="form-input w-full" name="sort">
+                    <option value="newest" {{ request('sort','newest') == 'newest' ? 'selected' : '' }}>Newest First</option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                    <option value="title"  {{ request('sort') == 'title'  ? 'selected' : '' }}>Title A–Z</option>
+                </select>
+            </div>
+            <div class="flex gap-2 items-end">
+                <button type="submit" class="btn bg-primary text-white gap-1.5 h-9.25"><i class="ti ti-filter text-sm"></i> Filter</button>
+                @if(request()->hasAny(['search','type','is_published','sort']))
+                <a href="{{ route('announcements.index') }}" class="btn bg-default-150 text-default-600 gap-1.5 h-9.25"><i class="ti ti-x text-sm"></i> Clear</a>
+                @endif
+            </div>
+        </form>
+    </div>
+</div>
 <div class="flex items-center justify-between mb-5">
     <div></div>
     <a href="{{ route('announcements.create') }}" class="btn bg-primary text-white btn-sm gap-1.5"><i class="ti ti-plus"></i> New Announcement</a>
@@ -15,6 +60,7 @@ $borderMap=['info'=>'border-l-info','warning'=>'border-l-warning','success'=>'bo
 $badgeMap=['info'=>'bg-info/10 text-info','warning'=>'bg-warning/10 text-warning','success'=>'bg-success/10 text-success','danger'=>'bg-danger/10 text-danger'];
 $iconMap=['info'=>'ti-info-circle','warning'=>'ti-alert-triangle','success'=>'ti-circle-check','danger'=>'ti-alert-circle'];
 @endphp
+<p class="text-sm text-default-500 mb-4">{{ $announcements->total() }} announcement(s) found</p>
 @if($announcements->isEmpty())
 <div class="card"><div class="card-body py-16 text-center">
     <div class="size-14 rounded-full bg-default-100 flex items-center justify-center mx-auto mb-4"><i class="size-7 text-default-400" data-lucide="megaphone"></i></div>

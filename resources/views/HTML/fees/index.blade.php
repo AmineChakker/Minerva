@@ -8,20 +8,58 @@
 @section('content')
 <div class="card mb-5">
     <div class="card-body">
-        <form method="GET" action="{{ route('fees.index') }}" class="flex flex-wrap items-end gap-4">
-            <div class="flex-1 min-w-36"><label class="block text-sm font-medium text-default-700 mb-1.5">Status</label>
-                <select class="form-select w-full" name="status"><option value="">All</option><option value="unpaid" {{ request('status')=='unpaid'?'selected':'' }}>Unpaid</option><option value="paid" {{ request('status')=='paid'?'selected':'' }}>Paid</option><option value="partial" {{ request('status')=='partial'?'selected':'' }}>Partial</option><option value="waived" {{ request('status')=='waived'?'selected':'' }}>Waived</option></select>
+        <form method="GET" action="{{ route('fees.index') }}" class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-52">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Search Student</label>
+                <div class="relative">
+                    <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-default-400 text-sm"></i>
+                    <input class="form-input w-full pl-9" name="search" value="{{ request('search') }}" placeholder="Student name...">
+                </div>
             </div>
-            <div class="flex-1 min-w-36"><label class="block text-sm font-medium text-default-700 mb-1.5">Academic Year</label>
-                <select class="form-select w-full" name="academic_year_id"><option value="">All Years</option>@foreach($academicYears as $y)<option value="{{ $y->id }}" {{ request('academic_year_id')==$y->id?'selected':'' }}>{{ $y->name }}</option>@endforeach</select>
+            <div class="min-w-40">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Status</label>
+                <select class="form-input w-full" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="unpaid"  {{ request('status') == 'unpaid'  ? 'selected' : '' }}>Unpaid</option>
+                    <option value="paid"    {{ request('status') == 'paid'    ? 'selected' : '' }}>Paid</option>
+                    <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                    <option value="waived"  {{ request('status') == 'waived'  ? 'selected' : '' }}>Waived</option>
+                </select>
             </div>
-            <button type="submit" class="btn bg-primary text-white gap-1.5"><i class="ti ti-filter text-sm"></i> Filter</button>
-            <a href="{{ route('fees.create') }}" class="btn bg-success text-white gap-1.5"><i class="ti ti-plus text-sm"></i> Add Fee</a>
+            <div class="min-w-44">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Academic Year</label>
+                <select class="form-input w-full" name="academic_year_id">
+                    <option value="">All Years</option>
+                    @foreach($academicYears as $year)
+                    <option value="{{ $year->id }}" {{ request('academic_year_id') == $year->id ? 'selected' : '' }}>{{ $year->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="min-w-40">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Sort By</label>
+                <select class="form-input w-full" name="sort">
+                    <option value="newest"     {{ request('sort','newest') == 'newest'     ? 'selected' : '' }}>Newest First</option>
+                    <option value="due_asc"    {{ request('sort') == 'due_asc'    ? 'selected' : '' }}>Due Date ↑</option>
+                    <option value="due_desc"   {{ request('sort') == 'due_desc'   ? 'selected' : '' }}>Due Date ↓</option>
+                    <option value="amount_desc"{{ request('sort') == 'amount_desc'? 'selected' : '' }}>Amount (High)</option>
+                    <option value="amount_asc" {{ request('sort') == 'amount_asc' ? 'selected' : '' }}>Amount (Low)</option>
+                </select>
+            </div>
+            <div class="flex gap-2 items-end">
+                <button type="submit" class="btn bg-primary text-white gap-1.5 h-9.25"><i class="ti ti-filter text-sm"></i> Filter</button>
+                @if(request()->hasAny(['search','status','academic_year_id','sort']))
+                <a href="{{ route('fees.index') }}" class="btn bg-default-150 text-default-600 gap-1.5 h-9.25"><i class="ti ti-x text-sm"></i> Clear</a>
+                @endif
+            </div>
         </form>
     </div>
 </div>
 <div class="card">
     <div class="card-body">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm text-default-500">{{ $fees->total() }} fee record(s) found</p>
+            <a href="{{ route('fees.create') }}" class="btn bg-success text-white btn-sm gap-1.5"><i class="ti ti-plus text-sm"></i> Add Fee</a>
+        </div>
         <div class="overflow-x-auto">
             <table class="table min-w-full">
                 <thead class="bg-default-100"><tr>

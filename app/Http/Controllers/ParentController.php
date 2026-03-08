@@ -18,12 +18,30 @@ class ParentController extends Controller
         return Auth::user()->school_id;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $parents = ParentProfile::with(['user', 'students.user'])
-            ->whereHas('user', fn($q) => $q->where('school_id', $this->schoolId()))
-            ->latest()->paginate(15);
+        $query = ParentProfile::with(['user', 'students.user'])
+            ->join('users', 'parents.user_id', '=', 'users.id')
+            ->where('users.school_id', $this->schoolId())
+            ->select('parents.*');
 
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(fn($q) => $q
+                ->where('users.first_name', 'like', $s)
+                ->orWhere('users.last_name', 'like', $s)
+                ->orWhere('users.email', 'like', $s)
+            );
+        }
+        if ($request->filled('relation')) $query->where('parents.relation_to_student', $request->relation);
+
+        match($request->input('sort', 'newest')) {
+            'name_asc'  => $query->orderBy('users.first_name')->orderBy('users.last_name'),
+            'name_desc' => $query->orderByDesc('users.first_name'),
+            default     => $query->orderByDesc('parents.created_at'),
+        };
+
+        $parents = $query->paginate(15)->withQueryString();
         return view('HTML.parents.index', compact('parents'));
     }
 

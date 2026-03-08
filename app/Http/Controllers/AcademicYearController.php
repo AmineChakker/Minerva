@@ -6,8 +6,23 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 class AcademicYearController extends Controller {
     private function schoolId(): int { return Auth::user()->school_id; }
-    public function index() {
-        $academicYears = AcademicYear::where('school_id', $this->schoolId())->orderByDesc('start_date')->paginate(15);
+    public function index(Request $request) {
+        $query = AcademicYear::where('school_id', $this->schoolId());
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%'.$request->search.'%');
+        }
+        if ($request->filled('is_current')) {
+            $query->where('is_current', $request->is_current === '1');
+        }
+
+        match($request->input('sort', 'newest')) {
+            'oldest'   => $query->orderBy('start_date'),
+            'name_asc' => $query->orderBy('name'),
+            default    => $query->orderByDesc('start_date'),
+        };
+
+        $academicYears = $query->paginate(15)->withQueryString();
         return view('HTML.academic-years.index', compact('academicYears'));
     }
     public function create() { return view('HTML.academic-years.create'); }

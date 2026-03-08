@@ -15,13 +15,28 @@ class ClassRoomController extends Controller
         return Auth::user()->school_id;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $classes = ClassRoom::with(['academicYear', 'classTeacher', 'students'])
-            ->where('school_id', $this->schoolId())
-            ->latest()->paginate(15);
+        $query = ClassRoom::with(['academicYear', 'classTeacher', 'students'])
+            ->where('school_id', $this->schoolId());
 
-        return view('HTML.classes.index', compact('classes'));
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(fn($q) => $q->where('name', 'like', $s)->orWhere('section', 'like', $s));
+        }
+        if ($request->filled('academic_year_id')) $query->where('academic_year_id', $request->academic_year_id);
+
+        match($request->input('sort', 'newest')) {
+            'name_asc'  => $query->orderBy('name')->orderBy('section'),
+            'name_desc' => $query->orderByDesc('name'),
+            'capacity'  => $query->orderByDesc('capacity'),
+            default     => $query->latest(),
+        };
+
+        $classes       = $query->paginate(15)->withQueryString();
+        $academicYears = AcademicYear::where('school_id', $this->schoolId())->orderByDesc('start_date')->get();
+
+        return view('HTML.classes.index', compact('classes', 'academicYears'));
     }
 
     public function create()

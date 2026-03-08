@@ -7,6 +7,46 @@
 @endsection
 
 @section('content')
+<div class="card mb-5">
+    <div class="card-body">
+        <form method="GET" action="{{ route('teachers.index') }}" class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-52">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Search</label>
+                <div class="relative">
+                    <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-default-400 text-sm"></i>
+                    <input class="form-input w-full pl-9" name="search" value="{{ request('search') }}" placeholder="Name, email, ID or specialization...">
+                </div>
+            </div>
+            <div class="min-w-40">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Status</label>
+                <select class="form-input w-full" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="active"     {{ request('status') == 'active'     ? 'selected' : '' }}>Active</option>
+                    <option value="on_leave"   {{ request('status') == 'on_leave'   ? 'selected' : '' }}>On Leave</option>
+                    <option value="resigned"   {{ request('status') == 'resigned'   ? 'selected' : '' }}>Resigned</option>
+                    <option value="terminated" {{ request('status') == 'terminated' ? 'selected' : '' }}>Terminated</option>
+                </select>
+            </div>
+            <div class="min-w-40">
+                <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Sort By</label>
+                <select class="form-input w-full" name="sort">
+                    <option value="newest"    {{ request('sort','newest') == 'newest'    ? 'selected' : '' }}>Newest First</option>
+                    <option value="name_asc"  {{ request('sort') == 'name_asc'  ? 'selected' : '' }}>Name A–Z</option>
+                    <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Name Z–A</option>
+                    <option value="hire_desc" {{ request('sort') == 'hire_desc' ? 'selected' : '' }}>Hire Date (Newest)</option>
+                    <option value="hire_asc"  {{ request('sort') == 'hire_asc'  ? 'selected' : '' }}>Hire Date (Oldest)</option>
+                    <option value="exp_desc"  {{ request('sort') == 'exp_desc'  ? 'selected' : '' }}>Most Experienced</option>
+                </select>
+            </div>
+            <div class="flex gap-2 items-end">
+                <button type="submit" class="btn bg-primary text-white gap-1.5 h-9.25"><i class="ti ti-filter text-sm"></i> Filter</button>
+                @if(request()->hasAny(['search','status','sort']))
+                <a href="{{ route('teachers.index') }}" class="btn bg-default-150 text-default-600 gap-1.5 h-9.25"><i class="ti ti-x text-sm"></i> Clear</a>
+                @endif
+            </div>
+        </form>
+    </div>
+</div>
 <div class="card">
     <div class="card-body">
         <div class="flex items-center justify-between mb-5">
@@ -14,6 +54,9 @@
             <a href="{{ route('teachers.create') }}" class="btn bg-primary text-white btn-sm gap-1.5">
                 <i class="ti ti-plus"></i> Add Teacher
             </a>
+        </div>
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm text-default-500">{{ $teachers->total() }} teacher(s) found</p>
         </div>
         <div class="overflow-x-auto">
             <table class="table min-w-full">

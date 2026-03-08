@@ -17,12 +17,36 @@ class TeacherController extends Controller
         return Auth::user()->school_id;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $teachers = Teacher::with('user')
-            ->whereHas('user', fn($q) => $q->where('school_id', $this->schoolId()))
-            ->latest()->paginate(15);
+        $query = Teacher::with('user')
+            ->join('users', 'teachers.user_id', '=', 'users.id')
+            ->where('users.school_id', $this->schoolId())
+            ->select('teachers.*');
 
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(fn($q) => $q
+                ->where('users.first_name', 'like', $s)
+                ->orWhere('users.last_name', 'like', $s)
+                ->orWhere('users.email', 'like', $s)
+                ->orWhere('teachers.employee_id', 'like', $s)
+                ->orWhere('teachers.specialization', 'like', $s)
+            );
+        }
+        if ($request->filled('status'))         $query->where('teachers.status', $request->status);
+        if ($request->filled('specialization')) $query->where('teachers.specialization', 'like', '%'.$request->specialization.'%');
+
+        match($request->input('sort', 'newest')) {
+            'name_asc'    => $query->orderBy('users.first_name')->orderBy('users.last_name'),
+            'name_desc'   => $query->orderByDesc('users.first_name'),
+            'hire_asc'    => $query->orderBy('teachers.hire_date'),
+            'hire_desc'   => $query->orderByDesc('teachers.hire_date'),
+            'exp_desc'    => $query->orderByDesc('teachers.experience_years'),
+            default       => $query->orderByDesc('teachers.created_at'),
+        };
+
+        $teachers = $query->paginate(15)->withQueryString();
         return view('HTML.teachers.index', compact('teachers'));
     }
 

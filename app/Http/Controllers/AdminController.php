@@ -9,8 +9,31 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 class AdminController extends Controller {
     private function schoolId(): int { return Auth::user()->school_id; }
-    public function index() {
-        $admins = Admin::with('user')->whereHas('user', fn($q) => $q->where('school_id', $this->schoolId()))->latest()->paginate(15);
+    public function index(Request $request) {
+        $query = Admin::with('user')
+            ->join('users', 'admins.user_id', '=', 'users.id')
+            ->where('users.school_id', $this->schoolId())
+            ->select('admins.*');
+
+        if ($request->filled('search')) {
+            $s = '%' . $request->search . '%';
+            $query->where(fn($q) => $q
+                ->where('users.first_name', 'like', $s)
+                ->orWhere('users.last_name', 'like', $s)
+                ->orWhere('users.email', 'like', $s)
+                ->orWhere('admins.department', 'like', $s)
+                ->orWhere('admins.employee_id', 'like', $s)
+            );
+        }
+        if ($request->filled('department')) $query->where('admins.department', 'like', '%'.$request->department.'%');
+
+        match($request->input('sort', 'newest')) {
+            'name_asc'  => $query->orderBy('users.first_name')->orderBy('users.last_name'),
+            'name_desc' => $query->orderByDesc('users.first_name'),
+            default     => $query->orderByDesc('admins.created_at'),
+        };
+
+        $admins = $query->paginate(15)->withQueryString();
         return view('HTML.admins.index', compact('admins'));
     }
     public function create() { return view('HTML.admins.create'); }
