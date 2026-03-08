@@ -28,19 +28,32 @@
                     <input class="form-input w-full" name="section" type="text" value="{{ old('section', $class->section) }}">
                 </div>
             </div>
-            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-6">
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Class Teacher</label>
-                    <select class="form-select w-full" name="teacher_id">
-                        <option value="">Select teacher</option>
-                        @foreach($teachers as $teacher)
-                        <option value="{{ $teacher->id }}" {{ old('teacher_id', $class->teacher_id) == $teacher->id ? 'selected' : '' }}>{{ $teacher->full_name }}</option>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Academic Year <span class="text-danger">*</span></label>
+                    <select class="form-input w-full" name="academic_year_id" required>
+                        <option value="">Select academic year</option>
+                        @foreach($academicYears as $year)
+                        <option value="{{ $year->id }}" {{ old('academic_year_id', $class->academic_year_id) == $year->id ? 'selected' : '' }}>
+                            {{ $year->name }}{{ $year->is_current ? ' (Current)' : '' }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Capacity</label>
-                    <input class="form-input w-full" name="capacity" type="number" value="{{ old('capacity', $class->capacity) }}" min="1">
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Capacity <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="capacity" type="number" value="{{ old('capacity', $class->capacity) }}" min="1" required>
+                </div>
+            </div>
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Class Teacher</label>
+                    <select class="form-input w-full" name="class_teacher_id">
+                        <option value="">Select teacher</option>
+                        @foreach($teachers as $teacher)
+                        <option value="{{ $teacher->id }}" {{ old('class_teacher_id', $class->class_teacher_id) == $teacher->id ? 'selected' : '' }}>{{ $teacher->full_name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 

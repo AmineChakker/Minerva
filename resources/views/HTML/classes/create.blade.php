@@ -31,10 +31,10 @@
             <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Class Teacher</label>
-                    <select class="form-select w-full" name="teacher_id">
+                    <select class="form-select w-full" name="class_teacher_id">
                         <option value="">Select teacher</option>
                         @foreach($teachers as $teacher)
-                        <option value="{{ $teacher->id }}" {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>{{ $teacher->full_name }}</option>
+                        <option value="{{ $teacher->id }}" {{ old('class_teacher_id') == $teacher->id ? 'selected' : '' }}>{{ $teacher->full_name }}</option>
                         @endforeach
                     </select>
                 </div>

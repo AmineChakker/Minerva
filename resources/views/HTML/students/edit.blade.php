@@ -86,12 +86,49 @@
             </div>
             <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-default-700 mb-1.5">Student ID Number</label>
-                    <input class="form-input w-full" name="student_id_number" type="text" value="{{ old('student_id_number', $student->student_id_number) }}">
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Admission Number <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="admission_number" type="text" value="{{ old('admission_number', $student->admission_number) }}" required>
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Academic Year <span class="text-danger">*</span></label>
+                    <select class="form-input w-full" name="academic_year_id" required>
+                        <option value="">Select academic year</option>
+                        @foreach($academicYears as $year)
+                        <option value="{{ $year->id }}" {{ old('academic_year_id', $student->academic_year_id) == $year->id ? 'selected' : '' }}>
+                            {{ $year->name }}{{ $year->is_current ? ' (Current)' : '' }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Enrollment Date <span class="text-danger">*</span></label>
+                    <input class="form-input w-full" name="enrollment_date" type="date" value="{{ old('enrollment_date', $student->enrollment_date?->format('Y-m-d')) }}" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Status <span class="text-danger">*</span></label>
+                    <select class="form-input w-full" name="status" required>
+                        <option value="active"    {{ old('status', $student->status) == 'active'    ? 'selected' : '' }}>Active</option>
+                        <option value="inactive"  {{ old('status', $student->status) == 'inactive'  ? 'selected' : '' }}>Inactive</option>
+                        <option value="suspended" {{ old('status', $student->status) == 'suspended' ? 'selected' : '' }}>Suspended</option>
+                        <option value="graduated" {{ old('status', $student->status) == 'graduated' ? 'selected' : '' }}>Graduated</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-4">
+                <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Date of Birth</label>
-                    <input class="form-input w-full" name="date_of_birth" type="date" value="{{ old('date_of_birth', $student->date_of_birth) }}">
+                    <input class="form-input w-full" name="date_of_birth" type="date" value="{{ old('date_of_birth', $student->date_of_birth?->format('Y-m-d')) }}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-default-700 mb-1.5">Blood Group</label>
+                    <select class="form-input w-full" name="blood_group">
+                        <option value="">Select</option>
+                        @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
+                        <option value="{{ $bg }}" {{ old('blood_group', $student->blood_group) == $bg ? 'selected' : '' }}>{{ $bg }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
             <div class="mb-6">

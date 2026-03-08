@@ -92,7 +92,7 @@
             <div class="grid sm:grid-cols-2 grid-cols-1 gap-4 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Hire Date</label>
-                    <input class="form-input w-full" name="hire_date" type="date" value="{{ old('hire_date', $teacher->hire_date) }}">
+                    <input class="form-input w-full" name="hire_date" type="date" value="{{ old('hire_date', $teacher->hire_date?->format('Y-m-d')) }}">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-default-700 mb-1.5">Status <span class="text-danger">*</span></label>
