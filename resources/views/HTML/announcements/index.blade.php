@@ -46,9 +46,7 @@ $iconMap=['info'=>'ti-info-circle','warning'=>'ti-alert-triangle','success'=>'ti
             </div>
             <div class="flex items-center gap-1.5">
                 <a href="{{ route('announcements.edit', $ann) }}" class="btn btn-sm bg-default-150 size-7 p-0 flex items-center justify-center"><i class="ti ti-edit text-xs"></i></a>
-                <form action="{{ route('announcements.destroy', $ann) }}" method="POST" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-7 p-0 flex items-center justify-center"><i class="ti ti-trash text-xs"></i></button>
-                </form>
+                <button type="button" onclick="openDeleteModal('{{ route('announcements.destroy', $ann) }}', 'Delete Announcement', 'Are you sure you want to delete this announcement? This cannot be undone.')" class="btn btn-sm bg-danger/10 text-danger gap-1"><i class="ti ti-trash text-sm"></i> Delete</button>
             </div>
         </div>
     </div>

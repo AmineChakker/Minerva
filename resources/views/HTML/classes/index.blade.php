@@ -48,12 +48,7 @@
                                 <a href="{{ route('classes.edit', $class) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
                                     <i class="ti ti-edit text-sm"></i>
                                 </a>
-                                <form action="{{ route('classes.destroy', $class) }}" method="POST" onsubmit="return confirm('Delete this class?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center">
-                                        <i class="ti ti-trash text-sm"></i>
-                                    </button>
-                                </form>
+                                <button type="button" onclick="openDeleteModal('{{ route('classes.destroy', $class) }}', 'Delete Class', 'Are you sure you want to delete {{ addslashes($class->full_name) }}? All students will be unassigned and related exams removed.')" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center" title="Delete"><i class="ti ti-trash text-sm"></i></button>
                             </div>
                         </td>
                     </tr>

@@ -38,12 +38,7 @@
                 <a href="{{ route('report-card.show', $student) }}" class="btn bg-success/10 text-success btn-sm gap-1">
                     <i class="ti ti-file-type-pdf text-sm"></i> Report Card
                 </a>
-                <form action="{{ route('students.destroy', $student) }}" method="POST" onsubmit="return confirm('Delete this student?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn bg-danger text-white btn-sm gap-1">
-                        <i class="ti ti-trash text-sm"></i> Delete
-                    </button>
-                </form>
+                <button type="button" onclick="openDeleteModal('{{ route('students.destroy', $student) }}', 'Delete Student', 'Are you sure you want to delete {{ addslashes($student->user->full_name) }}? All their attendance, exam results and fee records will also be removed.')" class="btn bg-danger text-white btn-sm gap-1"><i class="ti ti-trash text-sm"></i> Delete</button>
             </div>
         </div>
     </div>

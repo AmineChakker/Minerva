@@ -382,5 +382,60 @@
 
 <script type="module" src="/assets/app-BxTRRtUp.js"></script>
 @stack('scripts')
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="hidden fixed inset-0 z-[99] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="delete-modal-backdrop"></div>
+    <div class="relative bg-card rounded-2xl shadow-2xl w-full max-w-sm mx-auto p-6 border border-default-200">
+        <div class="flex flex-col items-center text-center mb-5">
+            <div class="size-14 rounded-full bg-danger/10 flex items-center justify-center mb-4">
+                <i class="ti ti-trash text-2xl text-danger"></i>
+            </div>
+            <h5 id="delete-modal-title" class="text-base font-semibold text-default-800 mb-1">Delete</h5>
+            <p id="delete-modal-message" class="text-sm text-default-500 leading-relaxed">Are you sure you want to delete this? This action cannot be undone.</p>
+        </div>
+        <form id="delete-modal-form" method="POST">
+            @csrf
+            <input type="hidden" name="_method" value="DELETE">
+            <div class="flex gap-3">
+                <button type="button" id="delete-modal-cancel" class="btn bg-default-150 text-default-600 flex-1 gap-1.5">
+                    <i class="ti ti-x text-sm"></i> Cancel
+                </button>
+                <button type="submit" class="btn bg-danger text-white flex-1 gap-1.5">
+                    <i class="ti ti-trash text-sm"></i> Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function () {
+    const modal    = document.getElementById('delete-modal');
+    const form     = document.getElementById('delete-modal-form');
+    const title    = document.getElementById('delete-modal-title');
+    const message  = document.getElementById('delete-modal-message');
+    const backdrop = document.getElementById('delete-modal-backdrop');
+    const cancelBtn = document.getElementById('delete-modal-cancel');
+
+    window.openDeleteModal = function (url, titleText, messageText) {
+        form.action = url;
+        title.textContent   = titleText   || 'Confirm Delete';
+        message.textContent = messageText || 'This action cannot be undone.';
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    };
+
+    function close() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    backdrop.addEventListener('click', close);
+    cancelBtn.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') close();
+    });
+})();
+</script>
 </body>
 </html>

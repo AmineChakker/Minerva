@@ -35,12 +35,7 @@
                 <a href="{{ route('teachers.edit', $teacher) }}" class="btn bg-primary text-white btn-sm gap-1">
                     <i class="ti ti-edit text-sm"></i> Edit
                 </a>
-                <form action="{{ route('teachers.destroy', $teacher) }}" method="POST" onsubmit="return confirm('Delete this teacher?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn bg-danger text-white btn-sm gap-1">
-                        <i class="ti ti-trash text-sm"></i> Delete
-                    </button>
-                </form>
+                <button type="button" onclick="openDeleteModal('{{ route('teachers.destroy', $teacher) }}', 'Delete Teacher', 'Are you sure you want to delete {{ addslashes($teacher->user->full_name) }}? This will also remove their account.')" class="btn bg-danger text-white btn-sm gap-1"><i class="ti ti-trash text-sm"></i> Delete</button>
             </div>
         </div>
     </div>

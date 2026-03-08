@@ -36,9 +36,7 @@
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('exams.show', $exam) }}" class="btn btn-sm bg-info/10 text-info text-xs px-2.5 py-1 gap-1"><i class="ti ti-table text-xs"></i> Results</a>
                                 <a href="{{ route('exams.edit', $exam) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center"><i class="ti ti-edit text-sm"></i></a>
-                                <form action="{{ route('exams.destroy', $exam) }}" method="POST" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center"><i class="ti ti-trash text-sm"></i></button>
-                                </form>
+                                <button type="button" onclick="openDeleteModal('{{ route('exams.destroy', $exam) }}', 'Delete Exam', 'Are you sure you want to delete {{ addslashes($exam->name) }}? All student results for this exam will also be removed.')" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center" title="Delete"><i class="ti ti-trash text-sm"></i></button>
                             </div>
                         </td>
                     </tr>

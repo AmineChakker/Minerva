@@ -29,12 +29,7 @@
                 <a href="{{ route('parents.edit', $parent) }}" class="btn bg-primary text-white btn-sm gap-1">
                     <i class="ti ti-edit text-sm"></i> Edit
                 </a>
-                <form action="{{ route('parents.destroy', $parent) }}" method="POST" onsubmit="return confirm('Delete this parent?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn bg-danger text-white btn-sm gap-1">
-                        <i class="ti ti-trash text-sm"></i> Delete
-                    </button>
-                </form>
+                <button type="button" onclick="openDeleteModal('{{ route('parents.destroy', $parent) }}', 'Delete Parent', 'Are you sure you want to delete {{ addslashes($parent->user->full_name) }}? This will also remove their account.')" class="btn bg-danger text-white btn-sm gap-1"><i class="ti ti-trash text-sm"></i> Delete</button>
             </div>
         </div>
     </div>

@@ -45,12 +45,7 @@
                                 <a href="{{ route('subjects.edit', $subject) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
                                     <i class="ti ti-edit text-sm"></i>
                                 </a>
-                                <form action="{{ route('subjects.destroy', $subject) }}" method="POST" onsubmit="return confirm('Delete this subject?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center">
-                                        <i class="ti ti-trash text-sm"></i>
-                                    </button>
-                                </form>
+                                <button type="button" onclick="openDeleteModal('{{ route('subjects.destroy', $subject) }}', 'Delete Subject', 'Are you sure you want to delete {{ addslashes($subject->name) }}? All exams for this subject will also be removed.')" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center" title="Delete"><i class="ti ti-trash text-sm"></i></button>
                             </div>
                         </td>
                     </tr>

@@ -53,12 +53,7 @@
                                 <a href="{{ route('admins.edit', $admin) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center">
                                     <i class="ti ti-edit text-sm"></i>
                                 </a>
-                                <form action="{{ route('admins.destroy', $admin) }}" method="POST" onsubmit="return confirm('Delete this admin?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center">
-                                        <i class="ti ti-trash text-sm"></i>
-                                    </button>
-                                </form>
+                                <button type="button" onclick="openDeleteModal('{{ route('admins.destroy', $admin) }}', 'Delete Admin', 'Are you sure you want to delete {{ addslashes($admin->user->full_name) }}? This will also remove their account.')" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center" title="Delete"><i class="ti ti-trash text-sm"></i></button>
                             </div>
                         </td>
                     </tr>

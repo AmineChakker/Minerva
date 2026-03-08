@@ -33,10 +33,7 @@
             </div>
             <div class="flex gap-2 mt-4">
                 <a href="{{ route('classes.edit', $class) }}" class="btn bg-primary text-white btn-sm">Edit</a>
-                <form action="{{ route('classes.destroy', $class) }}" method="POST" onsubmit="return confirm('Delete this class?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn bg-danger text-white btn-sm">Delete</button>
-                </form>
+                <button type="button" onclick="openDeleteModal('{{ route('classes.destroy', $class) }}', 'Delete Class', 'Are you sure you want to delete {{ addslashes($class->full_name) }}? All students will be unassigned and related exams removed.')" class="btn bg-danger text-white btn-sm gap-1"><i class="ti ti-trash text-sm"></i> Delete</button>
             </div>
         </div>
     </div>

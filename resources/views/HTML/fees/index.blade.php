@@ -45,7 +45,7 @@
                         <td class="px-6 py-3"><span class="badge {{ $bc }} capitalize">{{ $fee->status }}</span></td>
                         <td class="px-6 py-3"><div class="flex items-center gap-2">
                             <a href="{{ route('fees.edit', $fee) }}" class="btn btn-sm bg-default-150 size-8 p-0 flex items-center justify-center"><i class="ti ti-edit text-sm"></i></a>
-                            <form action="{{ route('fees.destroy', $fee) }}" method="POST" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')<button type="submit" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center"><i class="ti ti-trash text-sm"></i></button></form>
+                            <button type="button" onclick="openDeleteModal('{{ route('fees.destroy', $fee) }}', 'Delete Fee Record', 'Are you sure you want to delete this fee record for {{ addslashes($fee->student->user->full_name) }}?')" class="btn btn-sm bg-danger/10 text-danger size-8 p-0 flex items-center justify-center" title="Delete"><i class="ti ti-trash text-sm"></i></button>
                         </div></td>
                     </tr>
                     @empty
