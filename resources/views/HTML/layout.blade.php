@@ -51,6 +51,28 @@
             background-color: var(--color-card);
             color: var(--color-default-800);
         }
+        /* Search input with icon */
+        .search-wrap {
+            position: relative;
+        }
+        .search-wrap .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9rem;
+            color: var(--color-default-400);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .search-wrap input.form-input {
+            padding-left: 2.25rem !important;
+            height: calc(var(--spacing) * 9.25) !important;
+        }
+        .search-wrap input.form-input:focus {
+            border-color: var(--color-primary) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent) !important;
+        }
     </style>
 </head>
 <body>

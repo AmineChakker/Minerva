@@ -11,9 +11,9 @@
         <form method="GET" action="{{ route('academic-years.index') }}" class="flex flex-wrap items-end gap-3">
             <div class="flex-1 min-w-52">
                 <label class="block text-xs font-semibold text-default-500 uppercase mb-1.5">Search</label>
-                <div class="relative">
-                    <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-default-400 text-sm"></i>
-                    <input class="form-input w-full pl-9" name="search" value="{{ request('search') }}" placeholder="Year name e.g. 2024-2025...">
+                <div class="search-wrap">
+                    <i class="ti ti-search search-icon"></i>
+                    <input class="form-input w-full" name="search" value="{{ request('search') }}" placeholder="Year name e.g. 2024-2025...">
                 </div>
             </div>
             <div class="min-w-40">
