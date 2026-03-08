@@ -1,6 +1,10 @@
 @extends('HTML.layout')
 @section('title', 'Parents')
 @section('page-title', 'Parents')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Parents</span>
+@endsection
 
 @section('content')
 <div class="card">

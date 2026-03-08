@@ -1,6 +1,10 @@
 @extends('HTML.layout')
 @section('title', 'Exams')
 @section('page-title', 'Exams')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Exams</span>
+@endsection
 @section('content')
 <div class="card">
     <div class="card-body">

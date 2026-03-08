@@ -1,6 +1,14 @@
 @extends('HTML.layout')
 @section('title', 'Report Card — ' . $student->user->full_name)
 @section('page-title', 'Report Card')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<a class="font-medium text-default-500 hover:text-default-700" href="{{ route('students.index') }}">Students</a>
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<a class="font-medium text-default-500 hover:text-default-700" href="{{ route('students.show', $student) }}">{{ $student->user->full_name }}</a>
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Report Card</span>
+@endsection
 @section('content')
 
 {{-- Header row --}}

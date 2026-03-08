@@ -1,6 +1,10 @@
 @extends('HTML.layout')
 @section('title', 'Announcements')
 @section('page-title', 'Announcements')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Announcements</span>
+@endsection
 @section('content')
 <div class="flex items-center justify-between mb-5">
     <div></div>

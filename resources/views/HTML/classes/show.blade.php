@@ -1,6 +1,12 @@
 @extends('HTML.layout')
 @section('title', $class->full_name)
 @section('page-title', 'Class Details')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<a class="font-medium text-default-500 hover:text-default-700" href="{{ route('classes.index') }}">Classes</a>
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">{{ $class->full_name }}</span>
+@endsection
 
 @section('content')
 <div class="grid lg:grid-cols-3 grid-cols-1 gap-5">

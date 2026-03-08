@@ -1,6 +1,10 @@
 @extends('HTML.layout')
 @section('title', 'School Settings')
 @section('page-title', 'School Settings')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">School Settings</span>
+@endsection
 @section('content')
 <div class="card max-w-3xl">
     <div class="card-header border-b border-default-200 pb-4 mb-6 flex items-center gap-3">

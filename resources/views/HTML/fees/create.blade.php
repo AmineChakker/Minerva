@@ -1,6 +1,12 @@
 @extends('HTML.layout')
 @section('title', 'Add Fee')
 @section('page-title', 'Add Fee')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<a class="font-medium text-default-500 hover:text-default-700" href="{{ route('fees.index') }}">Fee Management</a>
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Add Fee</span>
+@endsection
 @section('content')
 <div class="card max-w-2xl">
     <div class="card-header border-b border-default-200 pb-4 mb-6 flex items-center gap-3">

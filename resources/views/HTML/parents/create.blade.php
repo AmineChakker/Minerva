@@ -1,6 +1,12 @@
 @extends('HTML.layout')
 @section('title', 'Add Parent')
 @section('page-title', 'Add Parent')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<a class="font-medium text-default-500 hover:text-default-700" href="{{ route('parents.index') }}">Parents</a>
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Add Parent</span>
+@endsection
 
 @section('content')
 <div class="card max-w-3xl">

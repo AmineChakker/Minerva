@@ -1,6 +1,10 @@
 @extends('HTML.layout')
 @section('title', 'Reports')
 @section('page-title', 'Reports')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Reports</span>
+@endsection
 @section('content')
 <div class="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-5 mb-6">
     <div class="card border-l-4 border-l-primary"><div class="card-body"><p class="text-xs text-default-400 mb-1">Total Students</p><h4 class="text-2xl font-bold text-default-800">{{ number_format($totalStudents) }}</h4><p class="text-xs mt-1"><span class="text-success">{{ $activeStudents }}</span> active</p></div></div>

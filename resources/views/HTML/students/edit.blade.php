@@ -1,6 +1,12 @@
 @extends('HTML.layout')
 @section('title', 'Edit Student')
 @section('page-title', 'Edit Student')
+@section('breadcrumbs')
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<a class="font-medium text-default-500 hover:text-default-700" href="{{ route('students.index') }}">Students</a>
+<i class="ti ti-chevron-right text-xs flex-shrink-0 text-default-400 rtl:rotate-180"></i>
+<span class="font-medium text-default-700">Edit Student</span>
+@endsection
 
 @section('content')
 <div class="card max-w-3xl">
