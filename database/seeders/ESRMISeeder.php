@@ -10,6 +10,7 @@ use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\Fee;
 use App\Models\ParentProfile;
+use App\Models\Schedule;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Subject;
@@ -26,6 +27,7 @@ class ESRMISeeder extends Seeder
     {
         // ── 1. Clear all non-admin data ─────────────────────────────────
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('schedules')->truncate();
         DB::table('attendances')->truncate();
         DB::table('exam_results')->truncate();
         DB::table('fees')->truncate();
@@ -35,6 +37,7 @@ class ESRMISeeder extends Seeder
         DB::table('students')->truncate();
         DB::table('parents')->truncate();
         DB::table('teachers')->truncate();
+        DB::table('class_subject')->truncate();
         DB::table('classes')->truncate();
         DB::table('subjects')->truncate();
         DB::table('academic_years')->truncate();
@@ -153,45 +156,185 @@ class ESRMISeeder extends Seeder
             ]);
         }
 
+        // ── 6b. Sync Subjects → Classes ─────────────────────────────────
+        $classSubjectMap = [
+            '1ère Année-Génie Informatique'         => ['MA-101', 'AP-102', 'BD-103', 'AP-301'],
+            '1ère Année-Génie Civil & BTP'          => ['MA-101', 'GC-106', 'TE-107', 'AP-301'],
+            '1ère Année-Génie Électrique & Énergie' => ['MA-101', 'EC-108', 'TE-107', 'AP-301'],
+            '2ème Année-Génie Informatique'         => ['BD-103', 'RS-104', 'DW-105', 'GP-303'],
+            '2ème Année-Management & Finance'       => ['MO-201', 'CF-202', 'MK-203', 'EG-204'],
+            '3ème Année-Génie Informatique'         => ['RS-104', 'DW-105', 'GP-303', 'CS-302'],
+            '3ème Année-Management & Finance'       => ['CF-202', 'MK-203', 'EG-204', 'GP-303'],
+        ];
+
+        foreach ($classSubjectMap as $classKey => $subjectCodes) {
+            $classObj   = $classes[$classKey];
+            $subjectIds = array_map(fn($code) => $subjects[$code]->id, $subjectCodes);
+            $classObj->subjects()->sync($subjectIds);
+        }
+
+        // ── 6c. Schedules ────────────────────────────────────────────────
+        // Teacher map: emp_id → user_id
+        $teacherUserId = fn(string $empId) => $teachers[$empId]->user_id;
+
+        // [class_key, subject_code, teacher_emp_id, day(1-5), start_time, end_time, room]
+        $scheduleData = [
+            // ── 1ère Année – Génie Informatique (GI-1) ──────────────────
+            ['1ère Année-Génie Informatique', 'MA-101', 'T-002', 1, '08:30', '10:00', 'Salle A101'],
+            ['1ère Année-Génie Informatique', 'MA-101', 'T-002', 3, '08:30', '10:00', 'Salle A101'],
+            ['1ère Année-Génie Informatique', 'AP-102', 'T-001', 2, '08:30', '10:00', 'Lab Info-1'],
+            ['1ère Année-Génie Informatique', 'AP-102', 'T-001', 4, '08:30', '10:00', 'Lab Info-1'],
+            ['1ère Année-Génie Informatique', 'BD-103', 'T-001', 1, '10:15', '11:45', 'Lab Info-1'],
+            ['1ère Année-Génie Informatique', 'BD-103', 'T-001', 5, '08:30', '10:00', 'Lab Info-1'],
+            ['1ère Année-Génie Informatique', 'AP-301', 'T-006', 2, '10:15', '11:45', 'Salle A101'],
+            ['1ère Année-Génie Informatique', 'AP-301', 'T-006', 4, '10:15', '11:45', 'Salle A101'],
+
+            // ── 1ère Année – Génie Civil & BTP (GC-1) ───────────────────
+            ['1ère Année-Génie Civil & BTP', 'MA-101', 'T-002', 1, '14:00', '15:30', 'Salle A102'],
+            ['1ère Année-Génie Civil & BTP', 'MA-101', 'T-002', 3, '14:00', '15:30', 'Salle A102'],
+            ['1ère Année-Génie Civil & BTP', 'GC-106', 'T-003', 2, '08:30', '10:00', 'Salle A102'],
+            ['1ère Année-Génie Civil & BTP', 'GC-106', 'T-003', 4, '08:30', '10:00', 'Salle A102'],
+            ['1ère Année-Génie Civil & BTP', 'TE-107', 'T-007', 2, '14:00', '15:30', 'Labo Physique'],
+            ['1ère Année-Génie Civil & BTP', 'TE-107', 'T-007', 4, '14:00', '15:30', 'Labo Physique'],
+            ['1ère Année-Génie Civil & BTP', 'AP-301', 'T-006', 3, '10:15', '11:45', 'Salle A102'],
+            ['1ère Année-Génie Civil & BTP', 'AP-301', 'T-006', 5, '10:15', '11:45', 'Salle A102'],
+
+            // ── 1ère Année – Génie Électrique & Énergie (GEE-1) ─────────
+            ['1ère Année-Génie Électrique & Énergie', 'MA-101', 'T-002', 2, '08:30', '10:00', 'Salle A103'],
+            ['1ère Année-Génie Électrique & Énergie', 'MA-101', 'T-002', 4, '14:00', '15:30', 'Salle A103'],
+            ['1ère Année-Génie Électrique & Énergie', 'EC-108', 'T-007', 1, '08:30', '10:00', 'Labo Elec'],
+            ['1ère Année-Génie Électrique & Énergie', 'EC-108', 'T-007', 3, '10:15', '11:45', 'Labo Elec'],
+            ['1ère Année-Génie Électrique & Énergie', 'TE-107', 'T-007', 2, '10:15', '11:45', 'Labo Physique'],
+            ['1ère Année-Génie Électrique & Énergie', 'TE-107', 'T-007', 4, '10:15', '11:45', 'Labo Physique'],
+            ['1ère Année-Génie Électrique & Énergie', 'AP-301', 'T-006', 1, '10:15', '11:45', 'Salle A103'],
+            ['1ère Année-Génie Électrique & Énergie', 'AP-301', 'T-006', 5, '08:30', '10:00', 'Salle A103'],
+
+            // ── 2ème Année – Génie Informatique (GI-2) ──────────────────
+            ['2ème Année-Génie Informatique', 'BD-103', 'T-001', 2, '14:00', '15:30', 'Lab Info-2'],
+            ['2ème Année-Génie Informatique', 'BD-103', 'T-001', 4, '14:00', '15:30', 'Lab Info-2'],
+            ['2ème Année-Génie Informatique', 'RS-104', 'T-008', 1, '08:30', '10:00', 'Lab Info-2'],
+            ['2ème Année-Génie Informatique', 'RS-104', 'T-008', 3, '08:30', '10:00', 'Lab Info-2'],
+            ['2ème Année-Génie Informatique', 'DW-105', 'T-008', 1, '10:15', '11:45', 'Lab Info-2'],
+            ['2ème Année-Génie Informatique', 'DW-105', 'T-008', 3, '10:15', '11:45', 'Lab Info-2'],
+            ['2ème Année-Génie Informatique', 'GP-303', 'T-008', 2, '08:30', '10:00', 'Salle B103'],
+            ['2ème Année-Génie Informatique', 'GP-303', 'T-008', 4, '08:30', '10:00', 'Salle B103'],
+
+            // ── 2ème Année – Management & Finance (MGT-2) ───────────────
+            ['2ème Année-Management & Finance', 'MO-201', 'T-004', 1, '08:30', '10:00', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'MO-201', 'T-004', 3, '08:30', '10:00', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'CF-202', 'T-005', 1, '10:15', '11:45', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'CF-202', 'T-005', 3, '10:15', '11:45', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'MK-203', 'T-004', 2, '08:30', '10:00', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'MK-203', 'T-004', 4, '08:30', '10:00', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'EG-204', 'T-005', 2, '10:15', '11:45', 'Salle B101'],
+            ['2ème Année-Management & Finance', 'EG-204', 'T-005', 4, '10:15', '11:45', 'Salle B101'],
+
+            // ── 3ème Année – Génie Informatique (GI-3) ──────────────────
+            ['3ème Année-Génie Informatique', 'CS-302', 'T-006', 1, '08:30', '10:00', 'Salle A104'],
+            ['3ème Année-Génie Informatique', 'CS-302', 'T-006', 3, '08:30', '10:00', 'Salle A104'],
+            ['3ème Année-Génie Informatique', 'DW-105', 'T-008', 1, '14:00', '15:30', 'Lab Info-3'],
+            ['3ème Année-Génie Informatique', 'DW-105', 'T-008', 3, '14:00', '15:30', 'Lab Info-3'],
+            ['3ème Année-Génie Informatique', 'RS-104', 'T-008', 2, '14:00', '15:30', 'Lab Info-3'],
+            ['3ème Année-Génie Informatique', 'RS-104', 'T-008', 4, '14:00', '15:30', 'Lab Info-3'],
+            ['3ème Année-Génie Informatique', 'GP-303', 'T-008', 4, '10:15', '11:45', 'Salle B103'],
+            ['3ème Année-Génie Informatique', 'GP-303', 'T-008', 5, '08:30', '10:00', 'Salle B103'],
+
+            // ── 3ème Année – Management & Finance (MGT-3) ───────────────
+            ['3ème Année-Management & Finance', 'CF-202', 'T-005', 1, '14:00', '15:30', 'Salle B102'],
+            ['3ème Année-Management & Finance', 'CF-202', 'T-005', 3, '14:00', '15:30', 'Salle B102'],
+            ['3ème Année-Management & Finance', 'MK-203', 'T-004', 2, '14:00', '15:30', 'Salle B102'],
+            ['3ème Année-Management & Finance', 'MK-203', 'T-004', 4, '14:00', '15:30', 'Salle B102'],
+            ['3ème Année-Management & Finance', 'EG-204', 'T-005', 5, '08:30', '10:00', 'Salle B102'],
+            ['3ème Année-Management & Finance', 'EG-204', 'T-005', 5, '10:15', '11:45', 'Salle B102'],
+            ['3ème Année-Management & Finance', 'GP-303', 'T-008', 2, '10:15', '11:45', 'Salle B103'],
+            ['3ème Année-Management & Finance', 'GP-303', 'T-008', 4, '15:45', '17:15', 'Salle B103'],
+        ];
+
+        foreach ($scheduleData as [$classKey, $subjectCode, $empId, $day, $start, $end, $room]) {
+            Schedule::create([
+                'school_id'        => 1,
+                'academic_year_id' => $year2425->id,
+                'class_id'         => $classes[$classKey]->id,
+                'subject_id'       => $subjects[$subjectCode]->id,
+                'teacher_id'       => $teacherUserId($empId),
+                'day_of_week'      => $day,
+                'start_time'       => $start . ':00',
+                'end_time'         => $end . ':00',
+                'room'             => $room,
+            ]);
+        }
+
         // ── 7. Students ──────────────────────────────────────────────────
         $studentData = [
-            // GI-1
-            ['Amine',    'Benali',      'male',   'amine.benali@esrmi.ma',      'GI1', '1ère Année-Génie Informatique',        '2006-03-14', 'ADM-2024-001'],
-            ['Sara',     'El Amrani',   'female', 'sara.elamrani@esrmi.ma',     'GI1', '1ère Année-Génie Informatique',        '2005-07-22', 'ADM-2024-002'],
-            ['Mehdi',    'Tazi',        'male',   'mehdi.tazi@esrmi.ma',        'GI1', '1ère Année-Génie Informatique',        '2006-01-05', 'ADM-2024-003'],
-            ['Yasmine',  'Chraibi',     'female', 'yasmine.chraibi@esrmi.ma',   'GI1', '1ère Année-Génie Informatique',        '2005-11-30', 'ADM-2024-004'],
-            ['Hamza',    'Ouazzani',    'male',   'hamza.ouazzani@esrmi.ma',    'GI1', '1ère Année-Génie Informatique',        '2006-05-18', 'ADM-2024-005'],
-            // GC-1
-            ['Youssef',  'El Idrissi',  'male',   'youssef.elidrissi@esrmi.ma', 'GC1', '1ère Année-Génie Civil & BTP',         '2005-09-10', 'ADM-2024-006'],
-            ['Nadia',    'Lahlou',      'female', 'nadia.lahlou@esrmi.ma',      'GC1', '1ère Année-Génie Civil & BTP',         '2006-02-28', 'ADM-2024-007'],
-            ['Omar',     'Bensouda',    'male',   'omar.bensouda@esrmi.ma',     'GC1', '1ère Année-Génie Civil & BTP',         '2005-12-01', 'ADM-2024-008'],
-            ['Hajar',    'Senhaji',     'female', 'hajar.senhaji@esrmi.ma',     'GC1', '1ère Année-Génie Civil & BTP',         '2006-06-15', 'ADM-2024-009'],
-            // GEE-1
-            ['Rayan',    'Moussaid',    'male',   'rayan.moussaid@esrmi.ma',    'GEE1','1ère Année-Génie Électrique & Énergie','2005-08-25', 'ADM-2024-010'],
-            ['Zineb',    'Hammouti',    'female', 'zineb.hammouti@esrmi.ma',    'GEE1','1ère Année-Génie Électrique & Énergie','2006-04-11', 'ADM-2024-011'],
-            ['Ilyas',    'Kettani',     'male',   'ilyas.kettani@esrmi.ma',     'GEE1','1ère Année-Génie Électrique & Énergie','2005-10-07', 'ADM-2024-012'],
-            ['Sanaa',    'Bakkali',     'female', 'sanaa.bakkali@esrmi.ma',     'GEE1','1ère Année-Génie Électrique & Énergie','2006-01-20', 'ADM-2024-013'],
-            // GI-2
-            ['Soufiane', 'Benkirane',   'male',   'soufiane.benkirane@esrmi.ma','GI2', '2ème Année-Génie Informatique',        '2004-05-03', 'ADM-2023-001'],
-            ['Meriem',   'Alaoui',      'female', 'meriem.alaoui@esrmi.ma',     'GI2', '2ème Année-Génie Informatique',        '2004-08-17', 'ADM-2023-002'],
-            ['Adam',     'Bouhmidi',    'male',   'adam.bouhmidi@esrmi.ma',     'GI2', '2ème Année-Génie Informatique',        '2005-02-09', 'ADM-2023-003'],
-            ['Houda',    'Lahlou',      'female', 'houda.lahlou@esrmi.ma',      'GI2', '2ème Année-Génie Informatique',        '2004-11-25', 'ADM-2023-004'],
-            ['Zakaria',  'Tazi',        'male',   'zakaria.tazi@esrmi.ma',      'GI2', '2ème Année-Génie Informatique',        '2004-07-14', 'ADM-2023-005'],
-            // MGT-2
-            ['Bilal',    'El Amrani',   'male',   'bilal.elamrani@esrmi.ma',    'MGT2','2ème Année-Management & Finance',      '2004-03-22', 'ADM-2023-006'],
-            ['Ghita',    'Benali',      'female', 'ghita.benali@esrmi.ma',      'MGT2','2ème Année-Management & Finance',      '2004-09-08', 'ADM-2023-007'],
-            ['Taha',     'Senhaji',     'male',   'taha.senhaji@esrmi.ma',      'MGT2','2ème Année-Management & Finance',      '2005-01-16', 'ADM-2023-008'],
-            ['Lamia',    'Ziani',       'female', 'lamia.ziani@esrmi.ma',       'MGT2','2ème Année-Management & Finance',      '2004-06-30', 'ADM-2023-009'],
-            ['Saad',     'Ouazzani',    'male',   'saad.ouazzani@esrmi.ma',     'MGT2','2ème Année-Management & Finance',      '2004-12-04', 'ADM-2023-010'],
-            // GI-3
-            ['Douaa',    'Chraibi',     'female', 'douaa.chraibi@esrmi.ma',     'GI3', '3ème Année-Génie Informatique',        '2003-04-19', 'ADM-2022-001'],
-            ['Rania',    'Kettani',     'female', 'rania.kettani@esrmi.ma',     'GI3', '3ème Année-Génie Informatique',        '2003-09-02', 'ADM-2022-002'],
-            ['Yassine',  'Bensouda',    'male',   'yassine.bensouda@esrmi.ma',  'GI3', '3ème Année-Génie Informatique',        '2002-11-12', 'ADM-2022-003'],
-            ['Amira',    'El Idrissi',  'female', 'amira.elidrissi@esrmi.ma',   'GI3', '3ème Année-Génie Informatique',        '2003-07-28', 'ADM-2022-004'],
-            // MGT-3
-            ['Jalal',    'Moussaid',    'male',   'jalal.moussaid@esrmi.ma',    'MGT3','3ème Année-Management & Finance',      '2002-05-05', 'ADM-2022-005'],
-            ['Rim',      'Hammouti',    'female', 'rim.hammouti@esrmi.ma',      'MGT3','3ème Année-Management & Finance',      '2003-02-14', 'ADM-2022-006'],
-            ['Reda',     'Bakkali',     'male',   'reda.bakkali@esrmi.ma',      'MGT3','3ème Année-Management & Finance',      '2002-08-30', 'ADM-2022-007'],
+            // GI-1 (10 students)
+            ['Amine',    'Benali',      'male',   'amine.benali@esrmi.ma',       'GI1', '1ère Année-Génie Informatique',        '2006-03-14', 'ADM-2024-001'],
+            ['Sara',     'El Amrani',   'female', 'sara.elamrani@esrmi.ma',      'GI1', '1ère Année-Génie Informatique',        '2005-07-22', 'ADM-2024-002'],
+            ['Mehdi',    'Tazi',        'male',   'mehdi.tazi@esrmi.ma',         'GI1', '1ère Année-Génie Informatique',        '2006-01-05', 'ADM-2024-003'],
+            ['Yasmine',  'Chraibi',     'female', 'yasmine.chraibi@esrmi.ma',    'GI1', '1ère Année-Génie Informatique',        '2005-11-30', 'ADM-2024-004'],
+            ['Hamza',    'Ouazzani',    'male',   'hamza.ouazzani@esrmi.ma',     'GI1', '1ère Année-Génie Informatique',        '2006-05-18', 'ADM-2024-005'],
+            ['Kaoutar',  'Zouiten',     'female', 'kaoutar.zouiten@esrmi.ma',    'GI1', '1ère Année-Génie Informatique',        '2006-02-11', 'ADM-2024-016'],
+            ['Khalil',   'Berrada',     'male',   'khalil.berrada@esrmi.ma',     'GI1', '1ère Année-Génie Informatique',        '2005-09-25', 'ADM-2024-017'],
+            ['Imane',    'Tahiri',      'female', 'imane.tahiri@esrmi.ma',       'GI1', '1ère Année-Génie Informatique',        '2006-06-03', 'ADM-2024-018'],
+            ['Othmane',  'Mansouri',    'male',   'othmane.mansouri@esrmi.ma',   'GI1', '1ère Année-Génie Informatique',        '2005-12-18', 'ADM-2024-019'],
+            ['Hiba',     'Rachidi',     'female', 'hiba.rachidi@esrmi.ma',       'GI1', '1ère Année-Génie Informatique',        '2006-04-29', 'ADM-2024-020'],
+            // GC-1 (8 students)
+            ['Youssef',  'El Idrissi',  'male',   'youssef.elidrissi@esrmi.ma',  'GC1', '1ère Année-Génie Civil & BTP',         '2005-09-10', 'ADM-2024-006'],
+            ['Nadia',    'Lahlou',      'female', 'nadia.lahlou@esrmi.ma',       'GC1', '1ère Année-Génie Civil & BTP',         '2006-02-28', 'ADM-2024-007'],
+            ['Omar',     'Bensouda',    'male',   'omar.bensouda@esrmi.ma',      'GC1', '1ère Année-Génie Civil & BTP',         '2005-12-01', 'ADM-2024-008'],
+            ['Hajar',    'Senhaji',     'female', 'hajar.senhaji@esrmi.ma',      'GC1', '1ère Année-Génie Civil & BTP',         '2006-06-15', 'ADM-2024-009'],
+            ['Anas',     'Boutaleb',    'male',   'anas.boutaleb@esrmi.ma',      'GC1', '1ère Année-Génie Civil & BTP',         '2005-10-22', 'ADM-2024-021'],
+            ['Widad',    'El Fassi',    'female', 'widad.elfassi@esrmi.ma',      'GC1', '1ère Année-Génie Civil & BTP',         '2006-01-07', 'ADM-2024-022'],
+            ['Noureddine','Cherkaoui',  'male',   'noureddine.cherkaoui@esrmi.ma','GC1','1ère Année-Génie Civil & BTP',         '2005-08-14', 'ADM-2024-023'],
+            ['Ghizlane', 'Bennis',      'female', 'ghizlane.bennis@esrmi.ma',    'GC1', '1ère Année-Génie Civil & BTP',         '2006-03-30', 'ADM-2024-024'],
+            // GEE-1 (8 students)
+            ['Rayan',    'Moussaid',    'male',   'rayan.moussaid@esrmi.ma',     'GEE1','1ère Année-Génie Électrique & Énergie','2005-08-25', 'ADM-2024-010'],
+            ['Zineb',    'Hammouti',    'female', 'zineb.hammouti@esrmi.ma',     'GEE1','1ère Année-Génie Électrique & Énergie','2006-04-11', 'ADM-2024-011'],
+            ['Ilyas',    'Kettani',     'male',   'ilyas.kettani@esrmi.ma',      'GEE1','1ère Année-Génie Électrique & Énergie','2005-10-07', 'ADM-2024-012'],
+            ['Sanaa',    'Bakkali',     'female', 'sanaa.bakkali@esrmi.ma',      'GEE1','1ère Année-Génie Électrique & Énergie','2006-01-20', 'ADM-2024-013'],
+            ['Tariq',    'Sabir',       'male',   'tariq.sabir@esrmi.ma',        'GEE1','1ère Année-Génie Électrique & Énergie','2006-05-08', 'ADM-2024-025'],
+            ['Loubna',   'Ziani',       'female', 'loubna.ziani@esrmi.ma',       'GEE1','1ère Année-Génie Électrique & Énergie','2005-11-17', 'ADM-2024-026'],
+            ['Yassir',   'Fennich',     'male',   'yassir.fennich@esrmi.ma',     'GEE1','1ère Année-Génie Électrique & Énergie','2006-02-24', 'ADM-2024-027'],
+            ['Manal',    'Benkirane',   'female', 'manal.benkirane@esrmi.ma',    'GEE1','1ère Année-Génie Électrique & Énergie','2005-07-13', 'ADM-2024-028'],
+            // GI-2 (10 students)
+            ['Soufiane', 'Benkirane',   'male',   'soufiane.benkirane@esrmi.ma', 'GI2', '2ème Année-Génie Informatique',        '2004-05-03', 'ADM-2023-001'],
+            ['Meriem',   'Alaoui',      'female', 'meriem.alaoui@esrmi.ma',      'GI2', '2ème Année-Génie Informatique',        '2004-08-17', 'ADM-2023-002'],
+            ['Adam',     'Bouhmidi',    'male',   'adam.bouhmidi@esrmi.ma',      'GI2', '2ème Année-Génie Informatique',        '2005-02-09', 'ADM-2023-003'],
+            ['Houda',    'Lahlou',      'female', 'houda.lahlou@esrmi.ma',       'GI2', '2ème Année-Génie Informatique',        '2004-11-25', 'ADM-2023-004'],
+            ['Zakaria',  'Tazi',        'male',   'zakaria.tazi@esrmi.ma',       'GI2', '2ème Année-Génie Informatique',        '2004-07-14', 'ADM-2023-005'],
+            ['Fatima',   'Oulhaj',      'female', 'fatima.oulhaj@esrmi.ma',      'GI2', '2ème Année-Génie Informatique',        '2004-03-28', 'ADM-2023-011'],
+            ['Ismail',   'Sekkouri',    'male',   'ismail.sekkouri@esrmi.ma',    'GI2', '2ème Année-Génie Informatique',        '2004-09-05', 'ADM-2023-012'],
+            ['Nour',     'El Mouden',   'female', 'nour.elmouden@esrmi.ma',      'GI2', '2ème Année-Génie Informatique',        '2005-01-19', 'ADM-2023-013'],
+            ['Ayoub',    'Kadiri',      'male',   'ayoub.kadiri@esrmi.ma',       'GI2', '2ème Année-Génie Informatique',        '2004-06-07', 'ADM-2023-014'],
+            ['Chaimae',  'Belkadi',     'female', 'chaimae.belkadi@esrmi.ma',    'GI2', '2ème Année-Génie Informatique',        '2004-12-23', 'ADM-2023-015'],
+            // MGT-2 (10 students)
+            ['Bilal',    'El Amrani',   'male',   'bilal.elamrani@esrmi.ma',     'MGT2','2ème Année-Management & Finance',      '2004-03-22', 'ADM-2023-006'],
+            ['Ghita',    'Benali',      'female', 'ghita.benali@esrmi.ma',       'MGT2','2ème Année-Management & Finance',      '2004-09-08', 'ADM-2023-007'],
+            ['Taha',     'Senhaji',     'male',   'taha.senhaji@esrmi.ma',       'MGT2','2ème Année-Management & Finance',      '2005-01-16', 'ADM-2023-008'],
+            ['Lamia',    'Ziani',       'female', 'lamia.ziani@esrmi.ma',        'MGT2','2ème Année-Management & Finance',      '2004-06-30', 'ADM-2023-009'],
+            ['Saad',     'Ouazzani',    'male',   'saad.ouazzani@esrmi.ma',      'MGT2','2ème Année-Management & Finance',      '2004-12-04', 'ADM-2023-010'],
+            ['Nassima',  'Amrani',      'female', 'nassima.amrani@esrmi.ma',     'MGT2','2ème Année-Management & Finance',      '2004-04-11', 'ADM-2023-016'],
+            ['Youssef',  'Chaoui',      'male',   'youssef.chaoui@esrmi.ma',     'MGT2','2ème Année-Management & Finance',      '2004-10-27', 'ADM-2023-017'],
+            ['Salma',    'Idrissi',     'female', 'salma.idrissi@esrmi.ma',      'MGT2','2ème Année-Management & Finance',      '2005-03-02', 'ADM-2023-018'],
+            ['Mehdi',    'Alami',       'male',   'mehdi.alami@esrmi.ma',        'MGT2','2ème Année-Management & Finance',      '2004-07-18', 'ADM-2023-019'],
+            ['Rim',      'Tazi',        'female', 'rim.tazi@esrmi.ma',           'MGT2','2ème Année-Management & Finance',      '2004-01-09', 'ADM-2023-020'],
+            // GI-3 (8 students)
+            ['Douaa',    'Chraibi',     'female', 'douaa.chraibi@esrmi.ma',      'GI3', '3ème Année-Génie Informatique',        '2003-04-19', 'ADM-2022-001'],
+            ['Rania',    'Kettani',     'female', 'rania.kettani@esrmi.ma',      'GI3', '3ème Année-Génie Informatique',        '2003-09-02', 'ADM-2022-002'],
+            ['Yassine',  'Bensouda',    'male',   'yassine.bensouda@esrmi.ma',   'GI3', '3ème Année-Génie Informatique',        '2002-11-12', 'ADM-2022-003'],
+            ['Amira',    'El Idrissi',  'female', 'amira.elidrissi@esrmi.ma',    'GI3', '3ème Année-Génie Informatique',        '2003-07-28', 'ADM-2022-004'],
+            ['Hamid',    'Bennis',      'male',   'hamid.bennis@esrmi.ma',       'GI3', '3ème Année-Génie Informatique',        '2002-12-05', 'ADM-2022-008'],
+            ['Sofia',    'Lahlali',     'female', 'sofia.lahlali@esrmi.ma',      'GI3', '3ème Année-Génie Informatique',        '2003-05-21', 'ADM-2022-009'],
+            ['Adil',     'Benali',      'male',   'adil.benali@esrmi.ma',        'GI3', '3ème Année-Génie Informatique',        '2002-09-14', 'ADM-2022-010'],
+            ['Zineb',    'Cherkaoui',   'female', 'zineb.cherkaoui@esrmi.ma',    'GI3', '3ème Année-Génie Informatique',        '2003-01-30', 'ADM-2022-011'],
+            // MGT-3 (8 students)
+            ['Jalal',    'Moussaid',    'male',   'jalal.moussaid@esrmi.ma',     'MGT3','3ème Année-Management & Finance',      '2002-05-05', 'ADM-2022-005'],
+            ['Rim',      'Hammouti',    'female', 'rim.hammouti@esrmi.ma',       'MGT3','3ème Année-Management & Finance',      '2003-02-14', 'ADM-2022-006'],
+            ['Reda',     'Bakkali',     'male',   'reda.bakkali@esrmi.ma',       'MGT3','3ème Année-Management & Finance',      '2002-08-30', 'ADM-2022-007'],
+            ['Hasnaa',   'El Mansouri', 'female', 'hasnaa.elmansouri@esrmi.ma',  'MGT3','3ème Année-Management & Finance',      '2002-10-17', 'ADM-2022-012'],
+            ['Karim',    'Zouheir',     'male',   'karim.zouheir@esrmi.ma',      'MGT3','3ème Année-Management & Finance',      '2003-03-08', 'ADM-2022-013'],
+            ['Nadia',    'Tahir',       'female', 'nadia.tahir@esrmi.ma',        'MGT3','3ème Année-Management & Finance',      '2002-07-25', 'ADM-2022-014'],
+            ['Rachid',   'Fahmi',       'male',   'rachid.fahmi@esrmi.ma',       'MGT3','3ème Année-Management & Finance',      '2003-06-12', 'ADM-2022-015'],
+            ['Samira',   'Bentaleb',    'female', 'samira.bentaleb@esrmi.ma',    'MGT3','3ème Année-Management & Finance',      '2002-11-28', 'ADM-2022-016'],
         ];
 
         $classKeyMap = [
@@ -314,17 +457,6 @@ class ESRMISeeder extends Seeder
         }
 
         // ── 10. Exams ────────────────────────────────────────────────────
-        // Map: class key → [subject codes]
-        $classSubjectMap = [
-            '1ère Année-Génie Informatique'         => ['MA-101', 'AP-102', 'BD-103', 'AP-301'],
-            '1ère Année-Génie Civil & BTP'          => ['MA-101', 'GC-106', 'TE-107', 'AP-301'],
-            '1ère Année-Génie Électrique & Énergie' => ['MA-101', 'EC-108', 'TE-107', 'AP-301'],
-            '2ème Année-Génie Informatique'         => ['BD-103', 'RS-104', 'DW-105', 'GP-303'],
-            '2ème Année-Management & Finance'       => ['MO-201', 'CF-202', 'MK-203', 'EG-204'],
-            '3ème Année-Génie Informatique'         => ['RS-104', 'DW-105', 'GP-303', 'CS-302'],
-            '3ème Année-Management & Finance'       => ['CF-202', 'MK-203', 'EG-204', 'GP-303'],
-        ];
-
         $exams = [];
         foreach ($classSubjectMap as $classKey => $subjectCodes) {
             $class = $classes[$classKey];
@@ -446,14 +578,15 @@ class ESRMISeeder extends Seeder
         }
 
         $this->command->info('✅ ESRMI seeded successfully!');
-        $this->command->info('   School  : ESRMI – Rabat');
-        $this->command->info('   Teachers: ' . Teacher::count());
-        $this->command->info('   Classes : ' . ClassRoom::count());
-        $this->command->info('   Students: ' . Student::count());
-        $this->command->info('   Exams   : ' . Exam::count());
-        $this->command->info('   Results : ' . ExamResult::count());
-        $this->command->info('   Fees    : ' . Fee::count());
-        $this->command->info('   Attend. : ' . Attendance::count());
+        $this->command->info('   School   : ESRMI – Rabat');
+        $this->command->info('   Teachers : ' . Teacher::count());
+        $this->command->info('   Classes  : ' . ClassRoom::count());
+        $this->command->info('   Students : ' . Student::count());
+        $this->command->info('   Schedules: ' . Schedule::count());
+        $this->command->info('   Exams    : ' . Exam::count());
+        $this->command->info('   Results  : ' . ExamResult::count());
+        $this->command->info('   Fees     : ' . Fee::count());
+        $this->command->info('   Attend.  : ' . Attendance::count());
     }
 
     private function realisticScore(): float

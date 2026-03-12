@@ -154,6 +154,13 @@
                         </a>
                     </li>
 
+                    <li class="menu-item">
+                        <a class="menu-link {{ request()->routeIs('schedules.*') ? 'active' : '' }}" href="{{ route('schedules.index') }}">
+                            <span class="menu-icon"><i class="ti ti-calendar-time"></i></span>
+                            <span class="menu-text">Schedule</span>
+                        </a>
+                    </li>
+
                     <li class="menu-title"><span>Attendance &amp; Exams</span></li>
 
                     <li class="menu-item">

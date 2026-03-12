@@ -14,6 +14,7 @@ use App\Http\Controllers\ParentController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SchoolSettingsController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
@@ -35,6 +36,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('subjects', SubjectController::class);
         Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
         Route::post('attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::resource('schedules', ScheduleController::class)->except(['show']);
         Route::resource('exams', ExamController::class);
         Route::post('exams/{exam}/results', [ExamResultController::class, 'store'])->name('exam-results.store');
         Route::get('students/{student}/report-card', [ReportCardController::class, 'show'])->name('report-card.show');
